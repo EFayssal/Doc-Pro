@@ -1,0 +1,295 @@
+/* General styles */
+body {
+    background-color: #121212;
+    color: #E0E0E0;
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+}
+
+/* Container styles */
+.container {
+    max-width: 700px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: #1E1E1E;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 255, 170, 0.2);
+}
+
+/* Heading styles */
+h2, h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #00ffae;
+}
+
+/* Form label styles */
+label {
+    display: block;
+    margin-bottom: 10px;
+    color: #ccc;
+}
+
+/* Input and textarea styles */
+input[type="text"],
+input[type="email"],
+textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 25px;
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+    color: #fff;
+    border-radius: 4px;
+    font-size: 15px;
+    box-sizing: border-box;
+}
+
+/* Button styles */
+button, .btn {
+    display: block;
+    width: 100%;
+    background-color: #00ffae;
+    border: none;
+    color: #000;
+    padding: 12px;
+    font-size: 16px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 20px;
+    text-align: center;
+    text-decoration: none;
+}
+
+button:hover, .btn:hover {
+    background-color: #00e29e;
+}
+
+/* Placeholder styles */
+::placeholder {
+    color: #888;
+    opacity: 1;
+}
+
+/* Checkbox label styles */
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+/* Preview styles */
+#cv-preview {
+    display: none;
+    margin-top: 30px;
+    padding: 20px;
+    background: #2a2a2a;
+    border-radius: 10px;
+}
+
+#cv-preview h3 {
+    color: #00ffae;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+#cv-preview ul {
+    padding-left: 20px;
+    margin-top: 5px;
+}
+
+#cv-preview li {
+    margin-bottom: 5px;
+}
+
+/* Home page card styles */
+.card {
+    background-color: #1e1e1e;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 0 25px rgba(0, 255, 170, 0.15);
+    max-width: 600px;
+    text-align: center;
+}
+
+/* From Uiverse.io by Zain-Muhammad */ 
+.tooltip-wrapper {
+    --clr-btn: #00ffae;
+    --clr-dropdown: rgba(2, 22, 36, 0);
+    --clr-nav-hover: rgba(2, 22, 36, 0);
+    --clr-dropdown-hov: rgba(2, 22, 36, 0);
+    --clr-dropdown-link-hov: rgba(255, 255, 255, 0);
+    --clr-light: #ffffff;
+    display: inline-block;
+    margin-top: 20px;
+    text-align: center;
+}
+
+.tooltip-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px; /* Space between buttons */
+}
+
+.tooltip-tab {
+    background-color: #00ffae; /* Match theme color */
+    color: #000000;
+    padding: 12px 25px;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 16px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.3s ease-in-out;
+}
+
+.tooltip-tab:hover {
+    background-color: #00e29e; /* Hover color */
+}
+
+.tooltip {
+    background-color: #c5c5c500; /* Match card background */
+    border: 1px solid #00ffae;
+    color: #000000;
+    box-shadow: 0 0 15px rgb(1, 175, 15);
+}
+
+.tooltip-link > a {
+    color: #00ffae; /* Match theme color */
+    transition: color 0.3s ease-in-out;
+}
+
+.tooltip-link > a:hover {
+    color: #00e29e; /* Hover color */
+}
+
+.nav-link {
+    position: relative;
+}
+
+.tooltip-wrapper > .tooltip-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.tooltip-container,
+.tooltip-menu-with-icon {
+    list-style: none;
+}
+
+.nav-link > .tooltip-tab {
+    color: var(--clr-light);
+    background: var(--clr-btn);
+    padding: 0.8rem 1rem;
+    letter-spacing: 1px;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    column-gap: 12px;
+    justify-content: space-between;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: 1px solid #00c1d5;
+    transition: 0.3s ease-in-out;
+}
+
+.nav-link > .tooltip-tab:hover svg {
+    transform: rotate(360deg);
+    transition: 0.3s ease-in-out;
+}
+
+.tooltip-links {
+    text-decoration: none;
+}
+
+.nav-link svg {
+    fill: #ffffff;
+}
+
+.tooltip {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 12rem;
+    max-width: 15rem;
+    transform: translateY(10px);
+    opacity: 0;
+    pointer-events: none;
+    transition: 0.5s;
+    padding: 15px 0px 0px 0px;
+}
+
+.tooltip::after {
+    content: "";
+    width: 15px;
+    height: 15px;
+    background: #00c1d5 no-repeat -30px -50px fixed;
+    top: 0px;
+    left: 6%;
+    position: absolute;
+    display: inline-block;
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    transform: rotate(360deg);
+    z-index: -1;
+    box-shadow: 0px 6px 30px rgb(2 22 36);
+}
+
+.tooltip .tooltip-menu-with-icon {
+    padding: 10px 0px;
+    background-color: var(--clr-dropdown);
+    border: 1px solid #00c1d5;
+    position: relative;
+}
+
+.tooltip-link {
+    position: relative;
+}
+
+.tooltip-link:not(:nth-last-child(2)) {
+    border-bottom: 1px solid var(--clr-dropdown);
+}
+
+.tooltip-link > a {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    column-gap: 10px;
+    background-color: var(--clr-dropdown);
+    color: var(--clr-light);
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+    transition: 0.3s;
+}
+
+.tooltip-menu-with-icon svg {
+    height: 20px;
+    margin-left: 0px;
+}
+
+.nav-link:hover > .tooltip-tab {
+    transform: scale(1.1);
+}
+
+.nav-link:hover > .tooltip,
+.tooltip-link:hover > .tooltip {
+    transform: translate(0, 0);
+    opacity: 1;
+    pointer-events: auto;
+    -webkit-transform: translate(0, 0);
+    -moz-transform: translate(0, 0);
+    -ms-transform: translate(0, 0);
+    -o-transform: translate(0, 0);
+}
+
+.nav-link:hover > .tooltip-tab {
+    transform: scale(1);
+    background-color: var(--clr-nav-hover);
+}

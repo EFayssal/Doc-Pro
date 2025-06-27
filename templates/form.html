@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Créateur de CV</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Création de CV – Emmaüs-Brie</h2>
+        <form id="cv-form" action="/generate" method="post">
+            <label for="nom">Nom :</label>
+            <input type="text" id="nom" name="nom" required>
+
+            <label for="age">Âge :</label>
+            <input type="text" id="age" name="age" required>
+
+            <label for="titre">Titre :</label>
+            <input type="text" id="titre" name="titre">
+
+            <label for="ville">Ville :</label>
+            <input type="text" id="ville" name="ville">
+
+            <label for="email">Email :</label>
+            <input type="email" id="email" name="email">
+
+            <label for="telephone">Téléphone :</label>
+            <input type="text" id="telephone" name="telephone">
+
+            <label for="profil">Profil :</label>
+            <textarea id="profil" name="profil" rows="4" placeholder="Décrivez votre parcours, vos objectifs..."></textarea>
+
+            <label for="experiences">Expériences :</label>
+            <textarea id="experiences" name="experiences" rows="5" placeholder="Ex : Vendeur – Emmaüs-Brie – 2023-2024&#10;• Conseil client&#10;• Mise en rayon..."></textarea>
+
+            <label for="competences">Compétences :</label>
+            <textarea id="competences" name="competences" rows="3" placeholder="Séparez par des virgules (ex : Accueil, Bureautique, Électronique...)"></textarea>
+
+            <label for="langues">Langues :</label>
+            <textarea id="langues" name="langues" rows="2" placeholder="Français (courant), Anglais (B1)..."></textarea>
+
+            <label for="formations">Formations :</label>
+            <textarea id="formations" name="formations" rows="3" placeholder="Ex : 2022 – Bac Pro Vente – Lycée Flora Tristan"></textarea>
+
+            <label for="interets">Centres d'intérêt :</label>
+            <textarea id="interets" name="interets" rows="2" placeholder="Ex : Sport, Réseaux sociaux, Musique..."></textarea>
+
+            <label class="checkbox-label">
+                <input type="checkbox" id="consentement" name="consentement" required>
+                <span>J'accepte que mes données soient utilisées pour générer mon CV.</span>
+            </label>
+
+            <label>Thème du CV :
+                <select name="theme" required>
+                    <option value="classique">Classique</option>
+                    <option value="moderne">Moderne</option>
+                    <option value="couleur">Couleur</option>
+                </select>
+            </label>
+
+            <!-- EN COURS DE DEVELOPPEMENT
+            <label>Format (cette fonctionnalité en cours de developpement) :
+                <select name="format" required>
+                    <option value="docx">Word (.docx)</option>
+                    <option value="pdf">PDF (.pdf)</opti_on>
+                </select>
+            </label>
+            <label for="photo">Photo de CV (optionel) :</label> <input type="file" id="photo" name="photo" accept="image/*">
+            -->
+        
+            <button type="button" onclick="genererApercu()">Aperçu du CV</button>
+            <button type="submit">Générer mon CV</button>
+            
+            <div id="cv-preview">
+                <h2 id="preview-nom"></h2>
+                <p id="preview-titre"></p>
+                <p id="preview-coordonnees"></p>
+                <h3>Profil</h3>
+                <p id="preview-profil"></p>
+                <h3>Expériences</h3>
+                <ul id="preview-experiences"></ul>
+                <h3>Compétences</h3>
+                <ul id="preview-competences"></ul>
+                <h3>Langues</h3>
+                <ul id="preview-langues"></ul>
+                <h3>Formation</h3>
+                <ul id="preview-formations"></ul>
+                <h3>Centres d'intérêt</h3>
+                <ul id="preview-interets"></ul>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function genererApercu() {
+            // Vérifier le consentement
+            if (!document.getElementById('consentement').checked) {
+                alert("Veuillez accepter les conditions d'utilisation");
+                return;
+            }
+
+            document.getElementById("cv-preview").style.display = "block";
+
+            // Nom et âge
+            const nom = document.getElementById('nom').value;
+            const age = document.getElementById('age').value;
+            document.getElementById("preview-nom").textContent = nom + (age ? ` – ${age} ans` : '');
+
+            // Titre
+            document.getElementById("preview-titre").textContent = document.getElementById('titre').value;
+
+            // Coordonnées
+            const ville = document.getElementById('ville').value;
+            const email = document.getElementById('email').value;
+            const telephone = document.getElementById('telephone').value;
+            
+            let coordonnees = [];
+            if (ville) coordonnees.push(`📍 ${ville}`);
+            if (email) coordonnees.push(`📧 ${email}`);
+            if (telephone) coordonnees.push(`📞 ${telephone}`);
+            
+            document.getElementById("preview-coordonnees").innerHTML = coordonnees.join('<br>');
+
+            // Profil
+            document.getElementById("preview-profil").textContent = document.getElementById('profil').value;
+
+            // Remplir les listes
+            remplirListe("experiences", "preview-experiences", '\n');
+            remplirListe("competences", "preview-competences", ',');
+            remplirListe("langues", "preview-langues", ',');
+            remplirListe("formations", "preview-formations", '\n');
+            remplirListe("interets", "preview-interets", ',');
+        }
+
+        function remplirListe(champ, cible, separateur) {
+            const ul = document.getElementById(cible);
+            ul.innerHTML = "";
+            const texte = document.getElementById(champ).value;
+            
+            if (!texte.trim()) return;
+            
+            const elements = texte.split(separateur)
+                                 .filter(el => el.trim())
+                                 .map(el => el.trim());
+            
+            elements.forEach(el => {
+                const li = document.createElement("li");
+                li.textContent = el;
+                ul.appendChild(li);
+            });
+        }
+    </script>
+</body>
+</html>
