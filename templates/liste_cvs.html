@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>CV Enregistrés</title>
+    <style>
+        body { background: #121212; color: #fff; font-family: sans-serif; padding: 20px; }
+        .cv { margin-bottom: 30px; border-bottom: 1px solid #444; padding-bottom: 15px; }
+        h2 { color: #00ffae; }
+    </style>
+</head>
+<body>
+    <h1>Liste des CV enregistrés</h1>
+    {% for cv in cvs %}
+    <div class="cv">
+        <h2>{{ cv['nom'] }} – {{ cv['titre'] }}</h2>
+        <p><strong>Ville :</strong> {{ cv['ville'] }} – <strong>Email :</strong> {{ cv['email'] }}</p>
+        <p><strong>Profil :</strong> {{ cv['profil'] }}</p>
+        <p><strong>Compétences :</strong> {{ cv['competences'] }}</p>
+        <p><strong>Formations :</strong> {{ cv['formations'] }}</p>
+        <small>Ajouté le {{ cv['created_at'] }}</small>
+    </div>
+    {% endfor %}
+</body>
+</html>

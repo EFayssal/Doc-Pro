@@ -7,6 +7,8 @@ from werkzeug.utils import secure_filename
 from PIL import Image
 import tempfile
 import os
+import sqlite3
+
 
 app = Flask(__name__)
 
@@ -116,6 +118,62 @@ def generate_cv():
         download_name=f"CV_{nom.replace(' ', '_')}.docx",
         mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
     )
+
+@app.route('/cvs')
+def liste_cvs():
+    conn = sqlite3.connect('cv_data.db')
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS cvs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nom TEXT,
+            age TEXT,
+            titre TEXT,
+            ville TEXT,
+            email TEXT,
+            telephone TEXT,
+            profil TEXT,
+            experiences TEXT,
+            competences TEXT,
+            langues TEXT,
+            formations TEXT,
+            interets TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    c.execute("SELECT * FROM cvs ORDER BY created_at DESC")
+    rows = c.fetchall()
+    conn.close()
+    return render_template("liste_cvs.html", cvs=rows)
+
+@app.route('/admin')
+def admin():
+    conn = sqlite3.connect("cv_data.db")
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS cvs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nom TEXT,
+            age TEXT,
+            titre TEXT,
+            ville TEXT,
+            email TEXT,
+            telephone TEXT,
+            profil TEXT,
+            experiences TEXT,
+            competences TEXT,
+            langues TEXT,
+            formations TEXT,
+            interets TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    cursor.execute("SELECT * FROM cvs ORDER BY created_at DESC")
+    rows = cursor.fetchall()
+    conn.close()
+    return render_template("admin.html", rows=rows)
 
 if __name__ == '__main__':
     app.run(debug=True)

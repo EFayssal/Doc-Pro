@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin – Données CV</title>
+    <style>
+        body { background: #121212; color: #eee; font-family: sans-serif; padding: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        td, th { border: 1px solid #444; padding: 8px; }
+        th { background-color: #00ffae; color: black; }
+        tr:nth-child(even) { background-color: #1e1e1e; }
+    </style>
+</head>
+<body>
+    <h1>Données enregistrées</h1>
+    <table>
+        <tr>
+            <th>Nom</th>
+            <th>Email</th>
+            <th>Titre</th>
+            <th>Ville</th>
+            <th>Créé le</th>
+        </tr>
+        {% for row in rows %}
+        <tr>
+            <td>{{ row[1] }}</td>
+            <td>{{ row[5] }}</td>
+            <td>{{ row[3] }}</td>
+            <td>{{ row[4] }}</td>
+            <td>{{ row[-1] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
