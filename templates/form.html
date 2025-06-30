@@ -5,11 +5,68 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Créateur de CV</title>
     <link rel="stylesheet" href="/static/styles.css">
+    <style>
+        .floating-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #00ffae;
+            color: #000;
+            border: none;
+            padding: 15px;
+            border-radius: 50%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            font-size: 20px;
+            transition: background-color 0.3s ease-in-out;
+        }
+
+        .floating-btn:hover {
+            background-color: #00e29e;
+        }
+
+        .floating-btn input[type="file"] {
+            display: none;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .btn-format {
+            background-color: #00ffae;
+            color: #000;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 255, 170, 0.3);
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .btn-format:hover {
+            background-color: #00e29e;
+            transform: scale(1.05);
+        }
+
+        .btn-format.pdf {
+            background-color: #ffae00;
+        }
+
+        .btn-format.pdf:hover {
+            background-color: #e29e00;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <h2>Création de CV – Emmaüs-Brie</h2>
-        <form id="cv-form" action="/generate" method="post">
+        <form id="cv-form" action="/generate" method="post" enctype="multipart/form-data">
             <label for="nom">Nom :</label>
             <input type="text" id="nom" name="nom" required>
 
@@ -51,26 +108,15 @@
                 <span>J'accepte que mes données soient utilisées pour générer mon CV.</span>
             </label>
 
-            <label>Thème du CV :
-                <select name="theme" required>
-                    <option value="classique">Classique</option>
-                    <option value="moderne">Moderne</option>
-                    <option value="couleur">Couleur</option>
-                </select>
-            </label>
+            <label for="photo">Photo de profil :</label>
+            <input type="file" id="photo" name="photo" accept="image/*">
 
-            <!-- EN COURS DE DEVELOPPEMENT
-            <label>Format (cette fonctionnalité en cours de developpement) :
-                <select name="format" required>
-                    <option value="docx">Word (.docx)</option>
-                    <option value="pdf">PDF (.pdf)</opti_on>
-                </select>
-            </label>
-            <label for="photo">Photo de CV (optionel) :</label> <input type="file" id="photo" name="photo" accept="image/*">
-            -->
-        
             <button type="button" onclick="genererApercu()">Aperçu du CV</button>
-            <button type="submit">Générer mon CV</button>
+            
+            <div class="btn-container">
+                <button class="btn-format" type="submit" name="format" value="docx">Télécharger en Word (.docx)</button>
+                <button class="btn-format pdf" type="submit" name="format" value="pdf">Télécharger en PDF</button>
+            </div>
             
             <div id="cv-preview">
                 <h2 id="preview-nom"></h2>
@@ -91,6 +137,12 @@
             </div>
         </form>
     </div>
+
+    <!-- Floating button for uploading a photo -->
+    <label class="floating-btn" for="photo">
+        📷
+        <input type="file" id="photo" name="photo" accept="image/*">
+    </label>
 
     <script>
         function genererApercu() {
