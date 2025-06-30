@@ -59,6 +59,33 @@ def generate_cv():
     if not nom or not age:
         return "Les champs 'Nom' et 'Âge' sont obligatoires.", 400
 
+    # Sauvegarde dans la base SQLite
+    conn = sqlite3.connect('cv_data.db')
+    c = conn.cursor()
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS cvs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nom TEXT,
+            age TEXT,
+            titre TEXT,
+            ville TEXT,
+            email TEXT,
+            telephone TEXT,
+            profil TEXT,
+            experiences TEXT,
+            competences TEXT,
+            langues TEXT,
+            formations TEXT,
+            interets TEXT
+        )
+    ''')
+    c.execute('''
+        INSERT INTO cvs (nom, age, titre, ville, email, telephone, profil, experiences, competences, langues, formations, interets)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (nom, age, titre, ville, email, telephone, profil, experiences, competences, langues, formations, interets))
+    conn.commit()
+    conn.close()
+
     # Création du document
     doc = Document()
     appliquer_style(doc, theme)
@@ -146,6 +173,15 @@ def liste_cvs():
     rows = c.fetchall()
     conn.close()
     return render_template("liste_cvs.html", cvs=rows)
+
+@app.route('/delete/<int:id>', methods=['POST'])
+def delete_cv(id):
+    conn = sqlite3.connect("cv_data.db")
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM cvs WHERE id = ?", (id,))
+    conn.commit()
+    conn.close()
+    return "CV supprimé avec succès.", 200
 
 @app.route('/admin')
 def admin():

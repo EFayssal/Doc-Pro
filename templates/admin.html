@@ -9,27 +9,66 @@
         td, th { border: 1px solid #444; padding: 8px; }
         th { background-color: #00ffae; color: black; }
         tr:nth-child(even) { background-color: #1e1e1e; }
+        .delete-btn {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .delete-btn:hover {
+            background-color: #ff1a1a;
+        }
     </style>
 </head>
 <body>
     <h1>Données enregistrées</h1>
     <table>
-        <tr>
-            <th>Nom</th>
-            <th>Email</th>
-            <th>Titre</th>
-            <th>Ville</th>
-            <th>Créé le</th>
-        </tr>
-        {% for row in rows %}
-        <tr>
-            <td>{{ row[1] }}</td>
-            <td>{{ row[5] }}</td>
-            <td>{{ row[3] }}</td>
-            <td>{{ row[4] }}</td>
-            <td>{{ row[-1] }}</td>
-        </tr>
-        {% endfor %}
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nom</th>
+                <th>Âge</th>
+                <th>Titre</th>
+                <th>Ville</th>
+                <th>Email</th>
+                <th>Téléphone</th>
+                <th>Profil</th>
+                <th>Expériences</th>
+                <th>Compétences</th>
+                <th>Langues</th>
+                <th>Formations</th>
+                <th>Centres d'intérêt</th>
+                <th>Date de création</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td>{{ row['id'] }}</td>
+                <td>{{ row['nom'] }}</td>
+                <td>{{ row['age'] }}</td>
+                <td>{{ row['titre'] }}</td>
+                <td>{{ row['ville'] }}</td>
+                <td>{{ row['email'] }}</td>
+                <td>{{ row['telephone'] }}</td>
+                <td>{{ row['profil'] }}</td>
+                <td>{{ row['experiences'] }}</td>
+                <td>{{ row['competences'] }}</td>
+                <td>{{ row['langues'] }}</td>
+                <td>{{ row['formations'] }}</td>
+                <td>{{ row['interets'] }}</td>
+                <td>{{ row['created_at'] }}</td>
+                <td>
+                    <form action="/delete/{{ row['id'] }}" method="post">
+                        <button class="delete-btn" type="submit">Supprimer</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
 </body>
 </html>
