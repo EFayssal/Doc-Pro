@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Modifier le CV</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Modifier le CV</h2>
+        <form action="/edit/{{ cv['id'] }}" method="post">
+            <label for="nom">Nom :</label>
+            <input type="text" id="nom" name="nom" value="{{ cv['nom'] }}" required>
+
+            <label for="age">Âge :</label>
+            <input type="text" id="age" name="age" value="{{ cv['age'] }}" required>
+
+            <label for="titre">Titre :</label>
+            <input type="text" id="titre" name="titre" value="{{ cv['titre'] }}">
+
+            <label for="ville">Ville :</label>
+            <input type="text" id="ville" name="ville" value="{{ cv['ville'] }}">
+
+            <label for="email">Email :</label>
+            <input type="email" id="email" name="email" value="{{ cv['email'] }}">
+
+            <label for="telephone">Téléphone :</label>
+            <input type="text" id="telephone" name="telephone" value="{{ cv['telephone'] }}">
+
+            <label for="profil">Profil :</label>
+            <textarea id="profil" name="profil" rows="4">{{ cv['profil'] }}</textarea>
+
+            <label for="experiences">Expériences :</label>
+            <textarea id="experiences" name="experiences" rows="5">{{ cv['experiences'] }}</textarea>
+
+            <label for="competences">Compétences :</label>
+            <textarea id="competences" name="competences" rows="3">{{ cv['competences'] }}</textarea>
+
+            <label for="langues">Langues :</label>
+            <textarea id="langues" name="langues" rows="2">{{ cv['langues'] }}</textarea>
+
+            <label for="formations">Formations :</label>
+            <textarea id="formations" name="formations" rows="3">{{ cv['formations'] }}</textarea>
+
+            <label for="interets">Centres d'intérêt :</label>
+            <textarea id="interets" name="interets" rows="2">{{ cv['interets'] }}</textarea>
+
+            <button type="submit">Enregistrer les modifications</button>
+        </form>
+        <form action="/download/{{ cv['id'] }}" method="get">
+            <button type="submit">Télécharger le CV</button>
+        </form>
+    </div>
+</body>
+</html>

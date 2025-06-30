@@ -211,5 +211,105 @@ def admin():
     conn.close()
     return render_template("admin.html", rows=rows)
 
+@app.route('/edit/<int:id>', methods=['GET', 'POST'])
+def edit_cv(id):
+    conn = sqlite3.connect("cv_data.db")
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    if request.method == 'POST':
+        # Update the CV entry
+        nom = request.form.get("nom", "").strip()
+        age = request.form.get("age", "").strip()
+        titre = request.form.get("titre", "").strip()
+        ville = request.form.get("ville", "").strip()
+        email = request.form.get("email", "").strip()
+        telephone = request.form.get("telephone", "").strip()
+        profil = request.form.get("profil", "").strip()
+        experiences = request.form.get("experiences", "").strip()
+        competences = request.form.get("competences", "").strip()
+        langues = request.form.get("langues", "").strip()
+        formations = request.form.get("formations", "").strip()
+        interets = request.form.get("interets", "").strip()
+
+        cursor.execute('''
+            UPDATE cvs
+            SET nom = ?, age = ?, titre = ?, ville = ?, email = ?, telephone = ?, profil = ?, experiences = ?, competences = ?, langues = ?, formations = ?, interets = ?
+            WHERE id = ?
+        ''', (nom, age, titre, ville, email, telephone, profil, experiences, competences, langues, formations, interets, id))
+        conn.commit()
+        conn.close()
+        return "CV mis à jour avec succès.", 200
+
+    # Fetch the CV entry for editing
+    cursor.execute("SELECT * FROM cvs WHERE id = ?", (id,))
+    row = cursor.fetchone()
+    conn.close()
+    return render_template("edit.html", cv=row)
+
+@app.route('/download/<int:id>', methods=['GET'])
+def download_cv(id):
+    conn = sqlite3.connect("cv_data.db")
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM cvs WHERE id = ?", (id,))
+    row = cursor.fetchone()
+    conn.close()
+
+    # Generate the updated CV document
+    doc = Document()
+    appliquer_style(doc, "classique")  # Default theme
+
+    doc.add_heading(f"{row['nom']} - {row['age']} ans", level=0)
+    if row['titre']:
+        doc.add_paragraph(row['titre'])
+
+    coordonnees = []
+    if row['ville']: coordonnees.append(f"📍 {row['ville']}")
+    if row['email']: coordonnees.append(f"📧 {row['email']}")
+    if row['telephone']: coordonnees.append(f"📞 {row['telephone']}")
+    if coordonnees:
+        doc.add_paragraph("\n".join(coordonnees))
+
+    if row['profil']:
+        doc.add_heading("Profil", level=1)
+        doc.add_paragraph(row['profil'])
+
+    if row['experiences']:
+        doc.add_heading("Expériences professionnelles", level=1)
+        for exp in filter(None, (e.strip() for e in row['experiences'].split('\n'))):
+            doc.add_paragraph(exp, style='List Bullet')
+
+    if row['competences']:
+        doc.add_heading("Compétences", level=1)
+        for comp in filter(None, (c.strip() for c in row['competences'].split(','))):
+            doc.add_paragraph(f"• {comp}", style='List Bullet')
+
+    if row['langues']:
+        doc.add_heading("Langues", level=1)
+        for lang in filter(None, (l.strip() for l in row['langues'].split(','))):
+            doc.add_paragraph(f"• {lang}", style='List Bullet')
+
+    if row['formations']:
+        doc.add_heading("Formation", level=1)
+        for form in filter(None, (f.strip() for f in row['formations'].split('\n'))):
+            doc.add_paragraph(f"• {form}", style='List Bullet')
+
+    if row['interets']:
+        doc.add_heading("Centres d'intérêt", level=1)
+        for interest in filter(None, (i.strip() for i in row['interets'].split(','))):
+            doc.add_paragraph(f"• {interest}", style='List Bullet')
+
+    buffer = BytesIO()
+    doc.save(buffer)
+    buffer.seek(0)
+
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name=f"CV_{row['nom'].replace(' ', '_')}.docx",
+        mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    )
+
 if __name__ == '__main__':
     app.run(debug=True)

@@ -2,73 +2,99 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Admin – Données CV</title>
+    <title>Admin – Gestion des CVs</title>
+    <link rel="stylesheet" href="/static/styles.css">
     <style>
-        body { background: #121212; color: #eee; font-family: sans-serif; padding: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        td, th { border: 1px solid #444; padding: 8px; }
-        th { background-color: #00ffae; color: black; }
-        tr:nth-child(even) { background-color: #1e1e1e; }
+        body {
+            background: #121212;
+            color: #eee;
+            font-family: sans-serif;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .cv-panel {
+            background-color: #1e1e1e;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 255, 170, 0.2);
+        }
+
+        .cv-panel h3 {
+            color: #00ffae;
+            margin-bottom: 10px;
+        }
+
+        .cv-panel p {
+            margin: 5px 0;
+        }
+
+        .cv-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .action-btn {
+            background-color: #00ffae;
+            color: #000;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .action-btn:hover {
+            background-color: #00e29e;
+        }
+
         .delete-btn {
             background-color: #ff4d4d;
             color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
         }
+
         .delete-btn:hover {
             background-color: #ff1a1a;
         }
     </style>
 </head>
 <body>
-    <h1>Données enregistrées</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nom</th>
-                <th>Âge</th>
-                <th>Titre</th>
-                <th>Ville</th>
-                <th>Email</th>
-                <th>Téléphone</th>
-                <th>Profil</th>
-                <th>Expériences</th>
-                <th>Compétences</th>
-                <th>Langues</th>
-                <th>Formations</th>
-                <th>Centres d'intérêt</th>
-                <th>Date de création</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for row in rows %}
-            <tr>
-                <td>{{ row['id'] }}</td>
-                <td>{{ row['nom'] }}</td>
-                <td>{{ row['age'] }}</td>
-                <td>{{ row['titre'] }}</td>
-                <td>{{ row['ville'] }}</td>
-                <td>{{ row['email'] }}</td>
-                <td>{{ row['telephone'] }}</td>
-                <td>{{ row['profil'] }}</td>
-                <td>{{ row['experiences'] }}</td>
-                <td>{{ row['competences'] }}</td>
-                <td>{{ row['langues'] }}</td>
-                <td>{{ row['formations'] }}</td>
-                <td>{{ row['interets'] }}</td>
-                <td>{{ row['created_at'] }}</td>
-                <td>
-                    <form action="/delete/{{ row['id'] }}" method="post">
-                        <button class="delete-btn" type="submit">Supprimer</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <h1>Gestion des CVs</h1>
+    <div class="container">
+        {% for row in rows %}
+        <div class="cv-panel">
+            <h3>{{ row['nom'] }} – {{ row['age'] }} ans</h3>
+            <p><strong>Titre :</strong> {{ row['titre'] }}</p>
+            <p><strong>Ville :</strong> {{ row['ville'] }}</p>
+            <p><strong>Email :</strong> {{ row['email'] }}</p>
+            <p><strong>Téléphone :</strong> {{ row['telephone'] }}</p>
+            <p><strong>Profil :</strong> {{ row['profil'] }}</p>
+            <p><strong>Expériences :</strong> {{ row['experiences'] }}</p>
+            <p><strong>Compétences :</strong> {{ row['competences'] }}</p>
+            <p><strong>Langues :</strong> {{ row['langues'] }}</p>
+            <p><strong>Formations :</strong> {{ row['formations'] }}</p>
+            <p><strong>Centres d'intérêt :</strong> {{ row['interets'] }}</p>
+            <p><strong>Date de création :</strong> {{ row['created_at'] }}</p>
+            <div class="cv-actions">
+                <form action="/edit/{{ row['id'] }}" method="get">
+                    <button class="action-btn" type="submit">Modifier</button>
+                </form>
+                <form action="/download/{{ row['id'] }}" method="get">
+                    <button class="action-btn" type="submit">Télécharger</button>
+                </form>
+                <form action="/delete/{{ row['id'] }}" method="post">
+                    <button class="action-btn delete-btn" type="submit">Supprimer</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 </body>
 </html>
