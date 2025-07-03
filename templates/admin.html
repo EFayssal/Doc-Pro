@@ -67,34 +67,50 @@
 </head>
 <body>
     <h1>Gestion des CVs</h1>
-    <div class="container">
-        {% for row in rows %}
-        <div class="cv-panel">
-            <h3>{{ row['nom'] }} – {{ row['age'] }} ans</h3>
-            <p><strong>Titre :</strong> {{ row['titre'] }}</p>
-            <p><strong>Ville :</strong> {{ row['ville'] }}</p>
-            <p><strong>Email :</strong> {{ row['email'] }}</p>
-            <p><strong>Téléphone :</strong> {{ row['telephone'] }}</p>
-            <p><strong>Profil :</strong> {{ row['profil'] }}</p>
-            <p><strong>Expériences :</strong> {{ row['experiences'] }}</p>
-            <p><strong>Compétences :</strong> {{ row['competences'] }}</p>
-            <p><strong>Langues :</strong> {{ row['langues'] }}</p>
-            <p><strong>Formations :</strong> {{ row['formations'] }}</p>
-            <p><strong>Centres d'intérêt :</strong> {{ row['interets'] }}</p>
-            <p><strong>Date de création :</strong> {{ row['created_at'] }}</p>
-            <div class="cv-actions">
-                <form action="/edit/{{ row['id'] }}" method="get">
-                    <button class="action-btn" type="submit">Modifier</button>
-                </form>
-                <form action="/download/{{ row['id'] }}" method="get">
-                    <button class="action-btn" type="submit">Télécharger</button>
-                </form>
-                <form action="/delete/{{ row['id'] }}" method="post">
-                    <button class="action-btn delete-btn" type="submit">Supprimer</button>
-                </form>
-            </div>
+    <form id="delete-multi-form" action="/delete-multi" method="post">
+        <div style="margin-bottom: 15px;">
+            <input type="checkbox" id="select-all" onclick="toggleAll(this)">
+            <label for="select-all" style="color:#00ffae;font-weight:bold;cursor:pointer;">Tout sélectionner</label>
+            <button class="action-btn delete-btn" type="submit" style="margin-left:20px;">Supprimer la sélection</button>
         </div>
-        {% endfor %}
-    </div>
+        <div class="container">
+            {% for row in rows %}
+            <div class="cv-panel">
+                <input type="checkbox" name="ids" value="{{ row['id'] }}" class="cv-checkbox" style="margin-right:10px;">
+                <h3>{{ row['nom'] }} – {{ row['age'] }} ans</h3>
+                <p><strong>Titre :</strong> {{ row['titre'] }}</p>
+                <p><strong>Ville :</strong> {{ row['ville'] }}</p>
+                <p><strong>Email :</strong> {{ row['email'] }}</p>
+                <p><strong>Téléphone :</strong> {{ row['telephone'] }}</p>
+                <p><strong>Profil :</strong> {{ row['profil'] }}</p>
+                <p><strong>Expériences :</strong> {{ row['experiences'] }}</p>
+                <p><strong>Compétences :</strong> {{ row['competences'] }}</p>
+                <p><strong>Langues :</strong> {{ row['langues'] }}</p>
+                <p><strong>Formations :</strong> {{ row['formations'] }}</p>
+                <p><strong>Centres d'intérêt :</strong> {{ row['interets'] }}</p>
+                <p><strong>Date de création :</strong> {{ row['created_at'] }}</p>
+                <div class="cv-actions">
+                    <form action="/edit/{{ row['id'] }}" method="get" style="display:inline;">
+                        <button class="action-btn" type="submit">Modifier</button>
+                    </form>
+                    <form action="/download/{{ row['id'] }}" method="get" style="display:inline;">
+                        <button class="action-btn" type="submit">Télécharger</button>
+                    </form>
+                    <form action="/delete/{{ row['id'] }}" method="post" style="display:inline;">
+                        <button class="action-btn delete-btn" type="submit">Supprimer</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </form>
+    <script>
+        function toggleAll(source) {
+            const checkboxes = document.querySelectorAll('.cv-checkbox');
+            for (const cb of checkboxes) {
+                cb.checked = source.checked;
+            }
+        }
+    </script>
 </body>
 </html>

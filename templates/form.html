@@ -6,66 +6,489 @@
     <title>Créateur de CV</title>
     <link rel="stylesheet" href="/static/styles.css">
     <style>
-        .floating-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: #00ffae;
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #00ffae 0%, #121212 100%);
+            font-family: 'SF Pro Display', 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .apple-card {
+            background: rgba(30, 30, 30, 0.98);
+            border-radius: 32px;
+            box-shadow: 0 8px 40px 0 rgba(0,255,170,0.10), 0 1.5px 8px 0 rgba(0,0,0,0.10);
+            padding: 48px 40px 32px 40px;
+            max-width: 480px;
+            width: 100%;
+            margin: 40px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: box-shadow 0.3s;
+            margin-left: 80px; /* Décale le formulaire pour laisser la place à la barre */
+        }
+        .apple-card:hover {
+            box-shadow: 0 16px 64px 0 rgba(0,255,170,0.18), 0 2px 12px 0 rgba(0,0,0,0.13);
+        }
+        h2 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+            color: #00ffae;
+            margin-bottom: 8px;
+            text-align: center;
+            font-family: 'SF Pro Display', 'Segoe UI', Arial, sans-serif;
+        }
+        h4 {
+            font-size: 1.1rem;
+            color: #b0b0b0;
+            font-weight: 400;
+            margin-bottom: 32px;
+            text-align: center;
+        }
+        form {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        label {
+            color: #f0f0f0;
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 4px;
+            letter-spacing: 0.01em;
+            transition: color 0.2s, letter-spacing 0.2s, transform 0.3s;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="file"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 13px 16px;
+            border-radius: 14px;
+            border: none;
+            background: rgba(255,255,255,0.08);
+            color: #ffffffc2;
+            font-size: 1rem;
+            font-family: inherit;
+            margin-bottom: 2px;
+            box-shadow: 0 1px 2px rgba(0,255,170,0.04);
+            transition: background 0.2s, box-shadow 0.2s, border 0.2s, transform 0.3s cubic-bezier(.4,2,.6,1);
+            outline: none;
+        }
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        textarea:focus,
+        select:focus {
+            background: rgba(0,255,170,0.10);
+            box-shadow: 0 0 0 2px #00ffae33;
+            transform: scale(1.04) translateX(8px);
+            z-index: 2;
+        }
+        textarea {
+            min-height: 48px;
+            resize: vertical;
+        }
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg width='14' height='8' viewBox='0 0 14 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L7 7L13 1' stroke='%2300ffae' stroke-width='2'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.2em;
+            background-color: #23272f; /* fond sombre pour le select */
+            color: #00ffae;
+        }
+        /* Optionnel : couleur des options dans le select (pour Chrome/Edge) */
+        select option {
+            background: #23272f;
+            color: #00ffae;
+        }
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;
+            margin-bottom: 0;
+        }
+        .checkbox-label input[type="checkbox"] {
+            accent-color: #00ffae;
+            width: 20px;
+            height: 20px;
+            border-radius: 6px;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            gap: 18px;
+            margin-top: 18px;
+        }
+        .btn-format {
+            background: linear-gradient(90deg, #00ffae 60%, #00e29e 100%);
             color: #000;
             border: none;
-            padding: 15px;
-            border-radius: 50%;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 13px 28px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.08rem;
             cursor: pointer;
-            font-size: 20px;
-            transition: background-color 0.3s ease-in-out;
+            box-shadow: 0 2px 8px rgba(0,255,170,0.10);
+            transition: background 0.2s, transform 0.15s;
         }
-
+        .btn-format:hover {
+            background: linear-gradient(90deg, #00e29e 60%, #00ffae 100%);
+            transform: translateY(-2px) scale(1.04);
+        }
+        .btn-format.pdf {
+            background: linear-gradient(90deg, #ffae00 60%, #e29e00 100%);
+            color: #222;
+        }
+        .btn-format.pdf:hover {
+            background: linear-gradient(90deg, #e29e00 60%, #ffae00 100%);
+        }
+        button[type="button"] {
+            background: none;
+            border: none;
+            color: #00ffae;
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 0;
+            margin-top: 0;
+            cursor: pointer;
+            transition: color 0.2s;
+            align-self: flex-end;
+        }
+        button[type="button"]:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+        #cv-preview {
+            display: none;
+            margin-top: 32px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 18px;
+            padding: 24px 18px;
+            color: #fff;
+            box-shadow: 0 1px 8px rgba(0,255,170,0.04);
+        }
+        #cv-preview h2, #cv-preview h3 {
+            color: #00ffae;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        #cv-preview ul {
+            margin-bottom: 12px;
+            margin-left: 0;
+            padding-left: 0;
+        }
+        #cv-preview li {
+            margin-bottom: 4px;
+            padding-left: 8px;
+            list-style: disc;
+        }
+        .floating-btn {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: linear-gradient(135deg, #00ffae 60%, #00e29e 100%);
+            color: #000;
+            border: none;
+            padding: 18px;
+            border-radius: 50%;
+            box-shadow: 0 4px 16px rgba(0,255,170,0.18);
+            cursor: pointer;
+            font-size: 22px;
+            transition: background 0.3s, box-shadow 0.2s;
+            z-index: 10;
+        }
         .floating-btn:hover {
-            background-color: #00e29e;
+            background: linear-gradient(135deg, #00e29e 60%, #00ffae 100%);
+            box-shadow: 0 8px 32px rgba(0,255,170,0.22);
         }
-
         .floating-btn input[type="file"] {
             display: none;
         }
 
-        .btn-container {
+        /* Progress bar styles */
+        .progress-container {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 110px; /* plus large pour le texte */
             display: flex;
+            flex-direction: column;
+            align-items: flex-start; /* aligne à gauche pour le texte */
+            z-index: 100;
             justify-content: center;
-            gap: 20px;
-            margin-top: 20px;
+            background: transparent;
+            padding-top: 40px;
+            padding-bottom: 40px;
+        }
+        .progress-bar-bg {
+            width: 8px;
+            height: 260px;
+            background: linear-gradient(to bottom, #00ffae 0%, #00e29e 100%);
+            border-radius: 8px;
+            position: relative;
+            margin: 24px 0 0 0;
+            box-shadow: 0 2px 12px #00ffae33;
+        }
+        .progress-bar-fill {
+            width: 8px;
+            background: linear-gradient(to bottom, #fff 0%, #00ffae 100%);
+            border-radius: 8px;
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            transition: height 0.4s cubic-bezier(.4,2,.6,1);
+        }
+        .progress-step {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #1e1e1e;
+            border: 3px solid #00ffae;
+            color: #00ffae;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 18px;
+            box-shadow: 0 2px 8px #00ffae22;
+            transition: background 0.2s, color 0.2s;
+        }
+        .progress-step.active, .progress-step.completed {
+            background: linear-gradient(135deg, #00ffae 60%, #00e29e 100%);
+            color: #000000;
+            border-color: #fff;
+        }
+        .progress-label {
+            color: #000000;
+            font-size: 1rem;
+            margin-bottom: 8px;
+            margin-top: 2px;
+            text-align: left;
+            width: 100px;
+            transform: none;
+            font-weight: 600;
+            opacity: 0.9;
+            padding-left: 8px;
+            padding-right: 2px;
+            word-break: break-word;
+            background: none;
+            /* Pour meilleure lisibilité sur fond clair */
+            text-shadow: 0 1px 4px #fff, 0 0 2px #00e29e;
+        }
+        @media (max-width: 700px) {
+            .progress-container {
+                display: none;
+            }
+        }
+        @media (max-width: 600px) {
+            .apple-card {
+                padding: 24px 8px 18px 8px;
+                max-width: 98vw;
+            }
+            .btn-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+        @media (max-width: 900px) {
+            .progress-container {
+                display: none;
+            }
+            .apple-card {
+                margin-left: 0;
+            }
         }
 
-        .btn-format {
-            background-color: #00ffae;
-            color: #000;
-            border: none;
-            padding: 15px 25px;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: bold;
+        /* Hero text fade-in animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+        h2, h4 {
+            opacity: 0;
+            animation: fadeIn 1s ease forwards;
+        }
+        h2 { animation-delay: 0.1s; }
+        h4 { animation-delay: 0.5s; }
+
+        /* Floating label effect for label (optional, for more Apple-like) */
+        label {
+            transition: color 0.2s, letter-spacing 0.2s, transform 0.3s;
+        }
+        /* Correction du surlignage du label au focus */
+        label {
+            transition: color 0.2s, letter-spacing 0.2s, transform 0.3s;
+        }
+        /* Ajoute la classe .label-focused pour surligner le label du champ focus */
+        label.label-focused {
+            color: #00ffae;
+            letter-spacing: 0.04em;
+            transform: translateX(4px);
+        }
+
+        /* Toggle Switch Styles */
+        .theme-toggle {
+            position: absolute;
+            top: 32px;
+            right: 32px;
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .theme-toggle input[type="checkbox"] {
+            display: none;
+        }
+        .toggle-label {
             cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0, 255, 170, 0.3);
-            transition: background-color 0.3s ease, transform 0.2s ease;
+            width: 48px;
+            height: 26px;
+            background: #23272f;
+            border-radius: 16px;
+            position: relative;
+            display: inline-block;
+            transition: background 0.3s;
+            box-shadow: 0 2px 8px #0003;
+        }
+        .toggle-label::after {
+            content: '';
+            position: absolute;
+            left: 4px;
+            top: 4px;
+            width: 18px;
+            height: 18px;
+            background: #00ffae;
+            border-radius: 50%;
+            transition: transform 0.3s, background 0.3s;
+            box-shadow: 0 1px 4px #00ffae55;
+        }
+        .theme-toggle input[type="checkbox"]:checked + .toggle-label {
+            background: #fff;
+        }
+        .theme-toggle input[type="checkbox"]:checked + .toggle-label::after {
+            transform: translateX(22px);
+            background: #23272f;
+            box-shadow: 0 1px 4px #23272f55;
+        }
+        .theme-toggle .toggle-icon {
+            font-size: 1.2em;
+            color: #00ffae;
+            transition: color 0.3s;
+        }
+        .theme-toggle input[type="checkbox"]:checked ~ .toggle-icon.sun {
+            color: #23272f;
+        }
+        .theme-toggle input[type="checkbox"]:not(:checked) ~ .toggle-icon.moon {
+            color: #fff;
         }
 
-        .btn-format:hover {
-            background-color: #00e29e;
-            transform: scale(1.05);
+        /* Light Theme */
+        body.light,
+        .light .apple-card {
+            background: linear-gradient(135deg, #fff 0%, #000000 100%);
+            color: #23272f;
         }
-
-        .btn-format.pdf {
-            background-color: #ffae00;
+        .light .apple-card {
+            background: #cecece;
+            box-shadow: 0 8px 40px 0 rgba(0,255,170,0.10), 0 1.5px 8px 0 rgba(0,0,0,0.10);
         }
-
-        .btn-format.pdf:hover {
-            background-color: #e29e00;
+        .light h2 {
+            color: #0b4b36;
+        }
+        .light h4 {
+            color: #23272f;
+        }
+        .light label {
+            color: #23272f;
+        }
+        .light input[type="text"],
+        .light input[type="email"],
+        .light input[type="file"],
+        .light textarea,
+        .light select {
+            background: #e6e6e6; /* gris clair mais pas blanc */
+            color: #23272f;
+            box-shadow: 0 1px 2px #00ffae11;
+            border: 1px solid #00ffae22;
+        }
+        .light input[type="text"]:focus,
+        .light input[type="email"]:focus,
+        .light textarea:focus,
+        .light select:focus {
+            background: #d1f5e6; /* un peu plus foncé au focus */
+            box-shadow: 0 0 0 2px #00ffae33;
+            color: #23272f;
+        }
+        .light select,
+        .light select option {
+            background: #e6e6e6;
+            color: #0b4b36;
+        }
+        .light .btn-format {
+            background: linear-gradient(90deg, #22ca92 60%, #05d89c 100%);
+            color: #23272f;
+        }
+        .light .btn-format.pdf {
+            background: linear-gradient(90deg, #ffae00 60%, #d39400 100%);
+            color: #23272f;
+        }
+        .light .floating-btn {
+            background: linear-gradient(135deg, #00ffae 60%, #00e29e 100%);
+            color: #23272f;
+        }
+        .light #cv-preview {
+            background: #f6f6f6;
+            color: #23272f;
+        }
+        .light .progress-container {
+            background: transparent;
+        }
+        .light .progress-step {
+            background: #fff;
+            color: #0b4b36;
+            border: 3px solid #00ffae;
+        }
+        .light .progress-step.active, .light .progress-step.completed {
+            background: linear-gradient(135deg, #00ffae 60%, #00e29e 100%);
+            color: #fff;
+            border-color: #fff;
+        }
+        .light .progress-label {
+            color: #00ffae;
+            text-shadow: none;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Création de CV – Emmaüs-Brie</h2>
+    <div class="theme-toggle">
+        <input type="checkbox" id="theme-switch">
+        <label class="toggle-label" for="theme-switch"></label>
+        <span class="toggle-icon sun" title="Clair">☀️</span>
+        <span class="toggle-icon moon" title="Sombre">🌙</span>
+    </div>
+    <div class="progress-container">
+        <div class="progress-step active" id="step-1">1</div>
+        <div class="progress-label">Informations<br>personnelles</div>
+        <div class="progress-step" id="step-2">2</div>
+        <div class="progress-label">Expérience</div>
+        <div class="progress-step" id="step-3">3</div>
+        <div class="progress-label">Compétences</div>
+        <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progress-bar-fill" style="height: 33%;"></div>
+        </div>
+    </div>
+    <div class="apple-card">
+        <h2>Création de CV</h2>
+        <h4>Veuillez remplir ces champs pour créer votre CV</h4>
         <form id="cv-form" action="/generate" method="post" enctype="multipart/form-data">
             <label for="nom">Nom :</label>
             <input type="text" id="nom" name="nom" required>
@@ -209,6 +632,107 @@
                 ul.appendChild(li);
             });
         }
+
+        // Progress bar logic
+        const fieldsStep1 = ['nom', 'age', 'titre', 'ville', 'email', 'telephone'];
+        const fieldsStep2 = ['profil', 'experiences', 'formations', 'interets'];
+        const fieldsStep3 = ['competences', 'langues'];
+
+        function getStep() {
+            // Step 1: If any personal info is empty, stay at 1
+            for (let id of fieldsStep1) {
+                if (!document.getElementById(id).value.trim()) return 1;
+            }
+            // Step 2: If any exp/form/profil/interets is empty, stay at 2
+            for (let id of fieldsStep2) {
+                if (!document.getElementById(id).value.trim()) return 2;
+            }
+            // Step 3: If any comp/lang is empty, stay at 3
+            for (let id of fieldsStep3) {
+                if (!document.getElementById(id).value.trim()) return 3;
+            }
+            // All filled
+            return 3;
+        }
+
+        function updateProgressBar() {
+            const step = getStep();
+            // Steps
+            for (let i = 1; i <= 3; i++) {
+                const el = document.getElementById('step-' + i);
+                if (i < step) {
+                    el.classList.add('completed');
+                    el.classList.remove('active');
+                } else if (i === step) {
+                    el.classList.add('active');
+                    el.classList.remove('completed');
+                } else {
+                    el.classList.remove('active');
+                    el.classList.remove('completed');
+                }
+            }
+            // Bar fill
+            let percent = 33;
+            if (step === 2) percent = 66;
+            if (step === 3) percent = 100;
+            document.getElementById('progress-bar-fill').style.height = percent + "%";
+        }
+
+        // Correction focus label: surligne le label du champ focus
+        document.addEventListener('DOMContentLoaded', function() {
+            // Pour tous les inputs et textarea du formulaire
+            document.querySelectorAll('#cv-form input, #cv-form textarea, #cv-form select').forEach(function(input) {
+                input.addEventListener('focus', function() {
+                    // Retire la classe sur tous les labels
+                    document.querySelectorAll('#cv-form label').forEach(function(lab) {
+                        lab.classList.remove('label-focused');
+                    });
+                    // Ajoute la classe sur le label lié à ce champ
+                    var label = document.querySelector('label[for="' + input.id + '"]');
+                    if (label) label.classList.add('label-focused');
+                });
+                input.addEventListener('blur', function() {
+                    var label = document.querySelector('label[for="' + input.id + '"]');
+                    if (label) label.classList.remove('label-focused');
+                });
+            });
+        });
+
+        // Attach input listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            const allFields = [...fieldsStep1, ...fieldsStep2, ...fieldsStep3];
+            for (let id of allFields) {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('input', updateProgressBar);
+                }
+            }
+            updateProgressBar();
+        });
+
+        // Dark/Light mode toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggle = document.getElementById('theme-switch');
+            const body = document.body;
+            const card = document.querySelector('.apple-card');
+            // Restore theme from localStorage if present
+            if (localStorage.getItem('theme') === 'light') {
+                body.classList.add('light');
+                card.classList.add('light');
+                toggle.checked = true;
+            }
+            toggle.addEventListener('change', function() {
+                if (toggle.checked) {
+                    body.classList.add('light');
+                    card.classList.add('light');
+                    localStorage.setItem('theme', 'light');
+                } else {
+                    body.classList.remove('light');
+                    card.classList.remove('light');
+                    localStorage.setItem('theme', 'dark');
+                }
+            });
+        });
     </script>
 </body>
 </html>
