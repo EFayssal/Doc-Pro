@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, send_file
+from flask import Flask, render_template, request, send_file, jsonify, redirect, url_for
 from docx import Document
 from io import BytesIO
 import docx.shared
@@ -289,7 +289,55 @@ def delete_cv(id):
     cursor.execute("DELETE FROM cvs WHERE id = ?", (id,))
     conn.commit()
     conn.close()
-    return "CV supprimé avec succès.", 200
+    return redirect(url_for('admin'))
+
+@app.route('/save_motivation', methods=['POST'])
+def save_motivation():
+    data = request.json
+    nom = data.get("nom", "").strip()
+    adresse = data.get("adresse", "").strip()
+    ville = data.get("ville", "").strip()
+    email = data.get("email", "").strip()
+    tel = data.get("tel", "").strip()
+    date_ville = data.get("date_ville", "").strip()
+    sujet = data.get("sujet", "").strip()
+    competences = data.get("competences", "").strip()
+    experience = data.get("experience", "").strip()
+    qualites = data.get("qualites", "").strip()
+
+    # Vérifie si une lettre identique existe déjà (évite les doublons sur la même génération)
+    conn = sqlite3.connect('cv_data.db')
+    c = conn.cursor()
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS lettres (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nom TEXT,
+            adresse TEXT,
+            ville TEXT,
+            email TEXT,
+            tel TEXT,
+            date_ville TEXT,
+            sujet TEXT,
+            competences TEXT,
+            experience TEXT,
+            qualites TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    c.execute('''
+        SELECT id FROM lettres WHERE
+            nom=? AND adresse=? AND ville=? AND email=? AND tel=? AND date_ville=? AND sujet=? AND competences=? AND experience=? AND qualites=?
+        ORDER BY created_at DESC LIMIT 1
+    ''', (nom, adresse, ville, email, tel, date_ville, sujet, competences, experience, qualites))
+    exists = c.fetchone()
+    if not exists:
+        c.execute('''
+            INSERT INTO lettres (nom, adresse, ville, email, tel, date_ville, sujet, competences, experience, qualites)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (nom, adresse, ville, email, tel, date_ville, sujet, competences, experience, qualites))
+        conn.commit()
+    conn.close()
+    return jsonify({"status": "ok"})
 
 @app.route('/admin')
 def admin():
@@ -316,8 +364,27 @@ def admin():
     ''')
     cursor.execute("SELECT * FROM cvs ORDER BY created_at DESC")
     rows = cursor.fetchall()
+    # Lettres de motivation
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS lettres (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nom TEXT,
+            adresse TEXT,
+            ville TEXT,
+            email TEXT,
+            tel TEXT,
+            date_ville TEXT,
+            sujet TEXT,
+            competences TEXT,
+            experience TEXT,
+            qualites TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    cursor.execute("SELECT * FROM lettres ORDER BY created_at DESC")
+    lettres = cursor.fetchall()
     conn.close()
-    return render_template("admin.html", rows=rows)
+    return render_template("admin.html", rows=rows, lettres=lettres)
 
 @app.route('/edit/<int:id>', methods=['GET', 'POST'])
 def edit_cv(id):
@@ -353,6 +420,8 @@ def edit_cv(id):
     cursor.execute("SELECT * FROM cvs WHERE id = ?", (id,))
     row = cursor.fetchone()
     conn.close()
+    if not row:
+        return "CV introuvable.", 404
     return render_template("edit.html", cv=row)
 
 def generate_professional_cv(doc, data):
@@ -450,6 +519,139 @@ def download_cv(id):
         download_name=f"CV_{row['nom'].replace(' ', '_')}.docx",
         mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
     )
+
+@app.route('/edit_lm/<int:id>', methods=['GET', 'POST'])
+def edit_lm(id):
+    conn = sqlite3.connect("cv_data.db")
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    if request.method == 'POST':
+        nom = request.form.get("nom", "").strip()
+        adresse = request.form.get("adresse", "").strip()
+        ville = request.form.get("ville", "").strip()
+        email = request.form.get("email", "").strip()
+        tel = request.form.get("tel", "").strip()
+        date_ville = request.form.get("date_ville", "").strip()
+        sujet = request.form.get("sujet", "").strip()
+        competences = request.form.get("competences", "").strip()
+        experience = request.form.get("experience", "").strip()
+        qualites = request.form.get("qualites", "").strip()
+        cursor.execute('''
+            UPDATE lettres
+            SET nom=?, adresse=?, ville=?, email=?, tel=?, date_ville=?, sujet=?, competences=?, experience=?, qualites=?
+            WHERE id=?
+        ''', (nom, adresse, ville, email, tel, date_ville, sujet, competences, experience, qualites, id))
+        conn.commit()
+        conn.close()
+        return "Lettre de motivation mise à jour avec succès.", 200
+    cursor.execute("SELECT * FROM lettres WHERE id = ?", (id,))
+    lettre = cursor.fetchone()
+    conn.close()
+    if not lettre:
+        return "Lettre de motivation introuvable.", 404
+    return render_template("edit_lm.html", lm=lettre)
+
+@app.route('/download_lm/<int:id>', methods=['GET'])
+def download_lm(id):
+    conn = sqlite3.connect("cv_data.db")
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM lettres WHERE id = ?", (id,))
+    lm = cursor.fetchone()
+    conn.close()
+    if not lm:
+        return "Lettre de motivation introuvable.", 404
+
+    # Génération du contenu HTML pour la lettre
+    lettre = f"""<b>{lm['nom']}</b><br><br><b>{lm['adresse']}</b><br><br><b>{lm['ville']}</b><br><br><b>{lm['email']}</b><br><br><b>Tél : {lm['tel']}</b><br><br><b>{lm['date_ville']}</b><br><br>
+<b>Objet : Candidature pour un poste en {lm['sujet']}</b><br><br>
+Madame, Monsieur,<br><br>
+Je me permets de vous adresser ma candidature pour un poste dans le domaine du {lm['sujet']} au sein de votre entreprise.<br><br>
+Titulaire de compétences telles que {lm['competences']}, """
+    if lm['experience']:
+        lettre += f"et fort(e) d'une expérience de {lm['experience']}, "
+    lettre += f"""je souhaite mettre à profit mes connaissances et mon savoir-faire pour contribuer au développement de votre structure.<br><br>
+Doté(e) de qualités personnelles comme {lm['qualites']}, je suis convaincu(e) de pouvoir m'intégrer rapidement à votre équipe et de participer activement à vos projets.<br><br>
+Je reste à votre disposition pour un entretien afin de vous exposer plus en détail ma motivation et mon parcours.<br><br>
+Je vous prie d’agréer, Madame, Monsieur, l’expression de mes salutations distinguées.<br><br>
+{lm['nom']}"""
+
+    htmlContent = f"""
+    <html>
+    <head><meta charset='utf-8'><title>Lettre de motivation</title></head>
+    <body style="font-family:Arial,Helvetica,sans-serif;font-size:15px;color:#222;">
+    {lettre}
+    </body></html>
+    """
+    from io import BytesIO
+    buffer = BytesIO()
+    buffer.write(htmlContent.encode('utf-8'))
+    buffer.seek(0)
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name=f"Lettre_de_motivation_{lm['nom'].replace(' ', '_')}.doc",
+        mimetype='application/msword'
+    )
+
+@app.route('/delete_lm/<int:id>', methods=['POST'])
+def delete_lm(id):
+    conn = sqlite3.connect("cv_data.db")
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM lettres WHERE id = ?", (id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('admin'))
+
+@app.route('/delete_bulk', methods=['POST'])
+def delete_bulk_cv():
+    ids = request.form.getlist('ids')
+    if ids:
+        unique_ids = list(set(str(int(i)) for i in ids if i.isdigit()))
+        if unique_ids:
+            conn = sqlite3.connect("cv_data.db")
+            cursor = conn.cursor()
+            cursor.execute(
+                f"DELETE FROM cvs WHERE id IN ({','.join(['?']*len(unique_ids))})",
+                unique_ids
+            )
+            conn.commit()
+            conn.close()
+    return redirect(url_for('admin'))
+
+@app.route('/delete_bulk_lm', methods=['POST'])
+def delete_bulk_lm():
+    ids = request.form.getlist('lm_ids')
+    if ids:
+        unique_ids = list(set(str(int(i)) for i in ids if i.isdigit()))
+        if unique_ids:
+            conn = sqlite3.connect("cv_data.db")
+            cursor = conn.cursor()
+            cursor.execute(
+                f"DELETE FROM lettres WHERE id IN ({','.join(['?']*len(unique_ids))})",
+                unique_ids
+            )
+            conn.commit()
+            conn.close()
+    return redirect(url_for('admin'))
+
+@app.route('/delete_all_cvs', methods=['POST'])
+def delete_all_cvs():
+    conn = sqlite3.connect("cv_data.db")
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM cvs")
+    conn.commit()
+    conn.close()
+    return redirect(url_for('admin'))
+
+@app.route('/delete_all_lettres', methods=['POST'])
+def delete_all_lettres():
+    conn = sqlite3.connect("cv_data.db")
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM lettres")
+    conn.commit()
+    conn.close()
+    return redirect(url_for('admin'))
 
 if __name__ == '__main__':
     app.run(debug=True)

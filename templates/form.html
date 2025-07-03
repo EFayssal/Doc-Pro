@@ -434,11 +434,11 @@
             color: #0b4b36;
         }
         .light .btn-format {
-            background: linear-gradient(90deg, #22ca92 60%, #05d89c 100%);
+            background: linear-gradient(90deg, #24ffb6 60%, #00e29e 100%);
             color: #23272f;
         }
         .light .btn-format.pdf {
-            background: linear-gradient(90deg, #ffae00 60%, #d39400 100%);
+            background: linear-gradient(90deg, #ffae00 60%, #e29e00 100%);
             color: #23272f;
         }
         .light .floating-btn {
@@ -453,14 +453,14 @@
             background: transparent;
         }
         .light .progress-step {
-            background: #fff;
+            background: #c0c0c0;
             color: #0b4b36;
-            border: 3px solid #00ffae;
+            border: 3px solid #b3b3b3;
         }
         .light .progress-step.active, .light .progress-step.completed {
-            background: linear-gradient(135deg, #00ffae 60%, #00e29e 100%);
+            background: linear-gradient(135deg, #00ffae 60%, #00a372 100%);
             color: #fff;
-            border-color: #fff;
+            border-color: #d4d4d4;
         }
         .light .progress-label {
             color: #00ffae;
@@ -574,6 +574,52 @@
         <input type="file" id="photo" name="photo" accept="image/*">
     </label>
 
+    <div class="apple-card" id="motivation-card" style="margin-top:40px;">
+        <h2>Générer une lettre de motivation</h2>
+        <form id="motivation-form" style="width:100%;display:flex;flex-direction:column;gap:18px;">
+            <label for="lm-nom">Nom complet :</label>
+            <input type="text" id="lm-nom" name="lm-nom" required placeholder="Ex : Jean Dupont">
+
+            <label for="lm-adresse">Adresse :</label>
+            <input type="text" id="lm-adresse" name="lm-adresse" placeholder="Ex : 10 rue des Lilas" required>
+
+            <label for="lm-ville">Ville :</label>
+            <input type="text" id="lm-ville" name="lm-ville" placeholder="Ex : 75000 Paris" required>
+
+            <label for="lm-email">Email :</label>
+            <input type="email" id="lm-email" name="lm-email" placeholder="Ex : jean.dupont@email.com" required>
+
+            <label for="lm-tel">Téléphone :</label>
+            <input type="text" id="lm-tel" name="lm-tel" placeholder="Ex : 06 12 34 56 78" required>
+
+            <label for="lm-date-ville">Lieu et date :</label>
+            <input type="text" id="lm-date-ville" name="lm-date-ville" placeholder="Ex : Paris, le 10 mai 2025" required>
+
+            <label for="lm-sujet">Sujet de l'entreprise :</label>
+            <input type="text" id="lm-sujet" name="lm-sujet" placeholder="Ex : développement web, support informatique..." required>
+
+            <label for="lm-competences">Compétences principales :</label>
+            <input type="text" id="lm-competences" name="lm-competences" placeholder="Ex : Python, HTML, Travail en équipe" required>
+
+            <label for="lm-experience">Expérience (facultatif) :</label>
+            <input type="text" id="lm-experience" name="lm-experience" placeholder="Ex : 2 ans en agence web">
+
+            <label for="lm-qualites">Qualités personnelles :</label>
+            <input type="text" id="lm-qualites" name="lm-qualites" placeholder="Ex : rigoureux, motivé, créatif" required>
+
+            <button type="button" class="btn-format" onclick="genererLettreMotivation()">Générer la lettre</button>
+            <div class="btn-container" id="lm-download-btns" style="display:none;">
+                <button class="btn-format" type="button" onclick="downloadLettre('docx')">Télécharger en Word (.docx)</button>
+                <button class="btn-format pdf" type="button" onclick="downloadLettre('pdf')">Télécharger en PDF</button>
+            </div>
+            <div id="motivation-preview" style="display:none;margin-top:24px;background:rgba(255,255,255,0.03);border-radius:14px;padding:18px;color:#fff;box-shadow:0 1px 8px rgba(0,255,170,0.04);">
+                <h3>Lettre de motivation générée :</h3>
+                <div id="motivation-lettre" style="white-space:pre-line;"></div>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script>
         function genererApercu() {
             // Vérifier le consentement
@@ -733,6 +779,117 @@
                 }
             });
         });
+
+        function generateMotivationLetter(nom, adresse, ville, email, tel, dateVille, sujet, competences, experience, qualites) {
+            // Utilise des balises <b> pour les champs demandés et ajoute des espaces entre les lignes
+            let headerLeft = `<b>${nom}</b><br><br><b>${adresse}</b><br><br><b>${ville}</b><br><br><b>${email}</b><br><br><b>Tél : ${tel}</b><br><br><b>${dateVille}</b>`;
+            let lettre = `${headerLeft}<br><br>`;
+            lettre += `<b>Objet : Candidature pour un poste en ${sujet}</b><br><br>`;
+            lettre += `Madame, Monsieur,<br><br>`;
+            lettre += `Je me permets de vous adresser ma candidature pour un poste dans le domaine du ${sujet} au sein de votre entreprise.<br><br>`;
+            lettre += `Titulaire de compétences telles que ${competences}, `;
+            if (experience && experience.trim() !== "") {
+                lettre += `et fort(e) d'une expérience de ${experience}, `;
+            }
+            lettre += `je souhaite mettre à profit mes connaissances et mon savoir-faire pour contribuer au développement de votre structure.<br><br>`;
+            lettre += `Doté(e) de qualités personnelles comme ${qualites}, je suis convaincu(e) de pouvoir m'intégrer rapidement à votre équipe et de participer activement à vos projets.<br><br>`;
+            lettre += `Je reste à votre disposition pour un entretien afin de vous exposer plus en détail ma motivation et mon parcours.<br><br>`;
+            lettre += `Je vous prie d’agréer, Madame, Monsieur, l’expression de mes salutations distinguées.<br><br>`;
+            lettre += `${nom}`;
+            return lettre;
+        }
+
+        function genererLettreMotivation() {
+            const nom = document.getElementById('lm-nom').value;
+            const adresse = document.getElementById('lm-adresse').value;
+            const ville = document.getElementById('lm-ville').value;
+            const email = document.getElementById('lm-email').value;
+            const tel = document.getElementById('lm-tel').value;
+            const dateVille = document.getElementById('lm-date-ville').value;
+            const sujet = document.getElementById('lm-sujet').value;
+            const competences = document.getElementById('lm-competences').value;
+            const experience = document.getElementById('lm-experience').value;
+            const qualites = document.getElementById('lm-qualites').value;
+
+            // Sauvegarde AJAX dans la base
+            fetch('/save_motivation', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    nom, adresse, ville, email, tel,
+                    date_ville: dateVille,
+                    sujet, competences, experience, qualites
+                })
+            });
+
+            const lettre = generateMotivationLetter(nom, adresse, ville, email, tel, dateVille, sujet, competences, experience, qualites);
+            document.getElementById('motivation-lettre').innerHTML = lettre;
+            document.getElementById('motivation-preview').style.display = "block";
+            document.getElementById('lm-download-btns').style.display = "flex";
+        }
+
+        function downloadLettre(format) {
+            const nom = document.getElementById('lm-nom').value;
+            const adresse = document.getElementById('lm-adresse').value;
+            const ville = document.getElementById('lm-ville').value;
+            const email = document.getElementById('lm-email').value;
+            const tel = document.getElementById('lm-tel').value;
+            const dateVille = document.getElementById('lm-date-ville').value;
+            const sujet = document.getElementById('lm-sujet').value;
+            const competences = document.getElementById('lm-competences').value;
+            const experience = document.getElementById('lm-experience').value;
+            const qualites = document.getElementById('lm-qualites').value;
+            const lettre = generateMotivationLetter(nom, adresse, ville, email, tel, dateVille, sujet, competences, experience, qualites);
+
+            if (format === 'pdf') {
+                // Génération PDF et téléchargement automatique via Blob
+                const html = `
+                    <div style="font-family: Arial, Helvetica, sans-serif; font-size: 15px; color: #222;">
+                        ${lettre}
+                    </div>
+                `;
+                // Crée un iframe caché pour convertir le HTML en PDF via print, puis capture le PDF
+                // Mais pour un vrai téléchargement PDF côté client sans librairie, on utilise print-to-pdf.
+                // Pour un vrai téléchargement automatique, on utilise jsPDF (si dispo), sinon fallback print.
+                if (window.jspdf || window.jsPDF) {
+                    // Si jsPDF est chargé sur la page
+                    const doc = new jsPDF();
+                    doc.setFont("helvetica", "normal");
+                    doc.setFontSize(15);
+                    doc.fromHTML(html, 15, 15, { 'width': 170 });
+                    doc.save(`Lettre_de_motivation_${nom.replace(/\s+/g, '_')}.pdf`);
+                } else {
+                    // Fallback : méthode print (ouvre la fenêtre d'impression)
+                    const win = window.open('', '', 'height=700,width=700');
+                    win.document.write('<html><head><title>Lettre de motivation</title>');
+                    win.document.write('</head><body>');
+                    win.document.write(html);
+                    win.document.write('</body></html>');
+                    win.document.close();
+                    win.onload = function() {
+                        win.focus();
+                        win.print();
+                    };
+                }
+            } else if (format === 'docx') {
+                // DOCX compatible: utilise Arial par défaut
+                const htmlContent = `
+                    <html xmlns:o='urn:schemas-microsoft-com:office:office'
+                          xmlns:w='urn:schemas-microsoft-com:office:word'
+                          xmlns='http://www.w3.org/TR/REC-html40'>
+                    <head><meta charset='utf-8'><title>Lettre de motivation</title></head>
+                    <body style="font-family:Arial,Helvetica,sans-serif;font-size:15px;color:#222;">
+                    ${lettre}
+                    </body></html>`;
+                const blob = new Blob(['\ufeff', htmlContent], { type: "application/msword" });
+                const link = document.createElement('a');
+                link.href = window.URL.createObjectURL(blob);
+                link.download = `Lettre_de_motivation_${nom.replace(/\s+/g, '_')}.doc`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
     </script>
 </body>
 </html>

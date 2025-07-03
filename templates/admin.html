@@ -67,16 +67,17 @@
 </head>
 <body>
     <h1>Gestion des CVs</h1>
-    <form id="delete-multi-form" action="/delete-multi" method="post">
-        <div style="margin-bottom: 15px;">
-            <input type="checkbox" id="select-all" onclick="toggleAll(this)">
-            <label for="select-all" style="color:#00ffae;font-weight:bold;cursor:pointer;">Tout sélectionner</label>
-            <button class="action-btn delete-btn" type="submit" style="margin-left:20px;">Supprimer la sélection</button>
-        </div>
-        <div class="container">
+    <div class="container">
+        <form id="bulk-delete-form" method="post" action="/delete_bulk" onsubmit="return confirm('Supprimer tous les CV sélectionnés ?');">
+            <div style="margin-bottom: 18px;">
+                <button class="action-btn delete-btn" type="submit" id="delete-selected-cv" disabled>Supprimer la sélection</button>
+                <label style="margin-left:18px;cursor:pointer;">
+                    <input type="checkbox" id="select-all-cv" style="vertical-align:middle;margin-right:6px;"> Tout sélectionner
+                </label>
+            </div>
             {% for row in rows %}
             <div class="cv-panel">
-                <input type="checkbox" name="ids" value="{{ row['id'] }}" class="cv-checkbox" style="margin-right:10px;">
+                <input type="checkbox" name="ids" value="{{ row['id'] }}" class="cv-checkbox" style="float:right;transform:scale(1.3);margin-top:2px;">
                 <h3>{{ row['nom'] }} – {{ row['age'] }} ans</h3>
                 <p><strong>Titre :</strong> {{ row['titre'] }}</p>
                 <p><strong>Ville :</strong> {{ row['ville'] }}</p>
@@ -90,27 +91,106 @@
                 <p><strong>Centres d'intérêt :</strong> {{ row['interets'] }}</p>
                 <p><strong>Date de création :</strong> {{ row['created_at'] }}</p>
                 <div class="cv-actions">
-                    <form action="/edit/{{ row['id'] }}" method="get" style="display:inline;">
-                        <button class="action-btn" type="submit">Modifier</button>
-                    </form>
-                    <form action="/download/{{ row['id'] }}" method="get" style="display:inline;">
-                        <button class="action-btn" type="submit">Télécharger</button>
-                    </form>
-                    <form action="/delete/{{ row['id'] }}" method="post" style="display:inline;">
-                        <button class="action-btn delete-btn" type="submit">Supprimer</button>
-                    </form>
+                    <a href="/edit/{{ row['id'] }}" class="action-btn" style="text-decoration:none;display:inline-block;">Modifier</a>
+                    <a href="/download/{{ row['id'] }}" class="action-btn" style="text-decoration:none;display:inline-block;">Télécharger</a>
+                    <!-- Correction: bouton Supprimer en dehors du <form id="bulk-delete-form"> -->
+                    <a href="/delete/{{ row['id'] }}" onclick="event.preventDefault(); if(confirm('Supprimer ce CV ?')) { var f=document.createElement('form'); f.method='POST'; f.action=this.href; document.body.appendChild(f); f.submit(); }" class="action-btn delete-btn" style="text-decoration:none;display:inline-block;">Supprimer</a>
                 </div>
             </div>
             {% endfor %}
-        </div>
-    </form>
+        </form>
+    </div>
+    <!-- Lettres de motivation -->
+    <h1 style="margin-top:40px;">Gestion des Lettres de motivation</h1>
+    <div class="container">
+        <form id="bulk-delete-lm-form" method="post" action="/delete_bulk_lm" onsubmit="return confirm('Supprimer toutes les lettres sélectionnées ?');">
+            <div style="margin-bottom: 18px;">
+                <button class="action-btn delete-btn" type="submit" id="delete-selected-lm" disabled>Supprimer la sélection</button>
+                <label style="margin-left:18px;cursor:pointer;">
+                    <input type="checkbox" id="select-all-lm" style="vertical-align:middle;margin-right:6px;"> Tout sélectionner
+                </label>
+            </div>
+            {% for lm in lettres %}
+            <div class="cv-panel">
+                <input type="checkbox" name="lm_ids" value="{{ lm['id'] }}" class="lm-checkbox" style="float:right;transform:scale(1.3);margin-top:2px;">
+                <h3>{{ lm['nom'] }}</h3>
+                <p><strong>Adresse :</strong> {{ lm['adresse'] }}</p>
+                <p><strong>Ville :</strong> {{ lm['ville'] }}</p>
+                <p><strong>Email :</strong> {{ lm['email'] }}</p>
+                <p><strong>Téléphone :</strong> {{ lm['tel'] }}</p>
+                <p><strong>Lieu et date :</strong> {{ lm['date_ville'] }}</p>
+                <p><strong>Sujet :</strong> {{ lm['sujet'] }}</p>
+                <p><strong>Compétences :</strong> {{ lm['competences'] }}</p>
+                <p><strong>Expérience :</strong> {{ lm['experience'] }}</p>
+                <p><strong>Qualités :</strong> {{ lm['qualites'] }}</p>
+                <p><strong>Date de création :</strong> {{ lm['created_at'] }}</p>
+                <div class="cv-actions">
+                    <a href="/edit_lm/{{ lm['id'] }}" class="action-btn" style="text-decoration:none;display:inline-block;">Modifier</a>
+                    <a href="/download_lm/{{ lm['id'] }}" class="action-btn" style="text-decoration:none;display:inline-block;">Télécharger</a>
+                    <!-- Correction: bouton Supprimer en dehors du <form id="bulk-delete-lm-form"> -->
+                    <a href="/delete_lm/{{ lm['id'] }}" onclick="event.preventDefault(); if(confirm('Supprimer cette lettre ?')) { var f=document.createElement('form'); f.method='POST'; f.action=this.href; document.body.appendChild(f); f.submit(); }" class="action-btn delete-btn" style="text-decoration:none;display:inline-block;">Supprimer</a>
+                </div>
+            </div>
+            {% endfor %}
+        </form>
+    </div>
     <script>
-        function toggleAll(source) {
-            const checkboxes = document.querySelectorAll('.cv-checkbox');
-            for (const cb of checkboxes) {
-                cb.checked = source.checked;
+        // Optimisation sélection/suppression en masse
+        document.addEventListener('DOMContentLoaded', function() {
+            // CV
+            const selectAllCv = document.getElementById('select-all-cv');
+            const cvCheckboxes = document.querySelectorAll('.cv-checkbox');
+            const deleteBtnCv = document.getElementById('delete-selected-cv');
+            function updateDeleteCvBtn() {
+                const anyChecked = Array.from(cvCheckboxes).some(cb => cb.checked);
+                deleteBtnCv.disabled = !anyChecked;
             }
-        }
+            if (selectAllCv) {
+                selectAllCv.addEventListener('change', function() {
+                    cvCheckboxes.forEach(cb => cb.checked = selectAllCv.checked);
+                    updateDeleteCvBtn();
+                });
+            }
+            cvCheckboxes.forEach(cb => {
+                cb.addEventListener('change', function() {
+                    updateDeleteCvBtn();
+                    // Si on décoche une case, on décoche "tout sélectionner"
+                    if (!cb.checked && selectAllCv.checked) selectAllCv.checked = false;
+                    // Si toutes sont cochées, on coche "tout sélectionner"
+                    if (Array.from(cvCheckboxes).every(c => c.checked)) selectAllCv.checked = true;
+                });
+            });
+            updateDeleteCvBtn();
+
+            // Lettres
+            const selectAllLm = document.getElementById('select-all-lm');
+            const lmCheckboxes = document.querySelectorAll('.lm-checkbox');
+            const deleteBtnLm = document.getElementById('delete-selected-lm');
+            function updateDeleteLmBtn() {
+                const anyChecked = Array.from(lmCheckboxes).some(cb => cb.checked);
+                deleteBtnLm.disabled = !anyChecked;
+            }
+            if (selectAllLm) {
+                selectAllLm.addEventListener('change', function() {
+                    lmCheckboxes.forEach(cb => cb.checked = selectAllLm.checked);
+                    updateDeleteLmBtn();
+                });
+            }
+            lmCheckboxes.forEach(cb => {
+                cb.addEventListener('change', function() {
+                    updateDeleteLmBtn();
+                    if (!cb.checked && selectAllLm.checked) selectAllLm.checked = false;
+                    if (Array.from(lmCheckboxes).every(c => c.checked)) selectAllLm.checked = true;
+                });
+            });
+            updateDeleteLmBtn();
+        });
     </script>
+</body>
+</html>
+        });
+    </script>
+</body>
+</html>
 </body>
 </html>

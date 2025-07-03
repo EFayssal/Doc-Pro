@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Modifier la lettre de motivation</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Modifier la lettre de motivation</h2>
+        <form action="/edit_lm/{{ lm['id'] }}" method="post">
+            <label for="nom">Nom complet :</label>
+            <input type="text" id="nom" name="nom" value="{{ lm['nom'] }}" required>
+
+            <label for="adresse">Adresse :</label>
+            <input type="text" id="adresse" name="adresse" value="{{ lm['adresse'] }}" required>
+
+            <label for="ville">Ville :</label>
+            <input type="text" id="ville" name="ville" value="{{ lm['ville'] }}" required>
+
+            <label for="email">Email :</label>
+            <input type="email" id="email" name="email" value="{{ lm['email'] }}" required>
+
+            <label for="tel">Téléphone :</label>
+            <input type="text" id="tel" name="tel" value="{{ lm['tel'] }}" required>
+
+            <label for="date_ville">Lieu et date :</label>
+            <input type="text" id="date_ville" name="date_ville" value="{{ lm['date_ville'] }}" required>
+
+            <label for="sujet">Sujet de l'entreprise :</label>
+            <input type="text" id="sujet" name="sujet" value="{{ lm['sujet'] }}" required>
+
+            <label for="competences">Compétences principales :</label>
+            <input type="text" id="competences" name="competences" value="{{ lm['competences'] }}" required>
+
+            <label for="experience">Expérience :</label>
+            <input type="text" id="experience" name="experience" value="{{ lm['experience'] }}">
+
+            <label for="qualites">Qualités personnelles :</label>
+            <input type="text" id="qualites" name="qualites" value="{{ lm['qualites'] }}" required>
+
+            <button type="submit">Enregistrer les modifications</button>
+        </form>
+        <form action="/download_lm/{{ lm['id'] }}" method="get">
+            <button type="submit">Télécharger la lettre</button>
+        </form>
+    </div>
+</body>
+</html>
