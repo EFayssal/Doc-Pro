@@ -3,3 +3,4 @@ python-docx
 pillow
 gunicorn
 reportlab
+weasyprint

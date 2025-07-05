@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, send_file, jsonify, redirect, url_for
+from flask import Flask, render_template, request, send_file, jsonify, redirect, url_for, make_response
 from docx import Document
 from io import BytesIO
 import docx.shared
@@ -10,6 +10,7 @@ import os
 import sqlite3
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+from weasyprint import HTML
 
 
 app = Flask(__name__)
@@ -42,6 +43,7 @@ def generate_cv():
         return "Vous devez accepter la politique de traitement des données.", 400
 
     # Récupération des données
+    modele = request.form.get("modele", "fayssal")  # <-- Correction ici, valeur par défaut = moderne
     theme = request.form.get("theme", "classique")
     nom = request.form.get("nom", "").strip()
     age = request.form.get("age", "").strip()
@@ -78,7 +80,8 @@ def generate_cv():
             competences TEXT,
             langues TEXT,
             formations TEXT,
-            interets TEXT
+            interets TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
     c.execute('''
@@ -86,7 +89,20 @@ def generate_cv():
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''', (nom, age, titre, ville, email, telephone, profil, experiences, competences, langues, formations, interets))
     conn.commit()
+    cv_id = c.lastrowid  # Récupère l'ID du CV inséré
     conn.close()
+
+    format = request.form.get("format", "docx")  # Default format is docx
+
+    # Si PDF et modèle moderne, redirige vers la route moderne
+    if format == "pdf" and modele == "fayssal":
+        return redirect(url_for('download_modern_cv', id=cv_id))
+    # Si PDF et modèle classique, redirige vers la route classique
+    if format == "pdf" and modele == "classique":
+        return redirect(url_for('download_classic_cv', id=cv_id))
+    # Si PDF et modèle étudiant, redirige vers la route étudiant
+    if format == "pdf" and modele == "etudiant":
+        return redirect(url_for('download_etudiant_cv', id=cv_id))
 
     # Récupération de la photo
     photo = request.files.get("photo")
@@ -168,8 +184,6 @@ def generate_cv():
         doc.add_heading("Centres d'intérêt", level=1)
         for interest in filter(None, (i.strip() for i in interets.split(','))):
             doc.add_paragraph(f"• {interest}", style='List Bullet')
-
-    format = request.form.get("format", "docx")  # Default format is docx
 
     if format == "pdf":
         # Generate PDF
@@ -653,5 +667,73 @@ def delete_all_lettres():
     conn.close()
     return redirect(url_for('admin'))
 
+@app.route('/download_modern/<int:id>', methods=['GET'])
+def download_modern_cv(id):
+    conn = sqlite3.connect("cv_data.db")
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM cvs WHERE id = ?", (id,))
+    row = cursor.fetchone()
+    conn.close()
+    if not row:
+        return "CV introuvable.", 404
+
+    # Rendu du template HTML moderne avec Jinja2
+    rendered = render_template("cv_modern.html", cv=row)
+
+    # Génération du PDF avec WeasyPrint
+    pdf = HTML(string=rendered, base_url=request.base_url).write_pdf()
+
+    response = make_response(pdf)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = f'attachment; filename=CV_{row["nom"].replace(" ", "_")}_modern.pdf'
+    return response
+
+@app.route('/download_classic/<int:id>', methods=['GET'])
+def download_classic_cv(id):
+    conn = sqlite3.connect("cv_data.db")
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM cvs WHERE id = ?", (id,))
+    row = cursor.fetchone()
+    conn.close()
+    if not row:
+        return "CV introuvable.", 404
+
+    rendered = render_template("cv_classic.html", cv=row)
+    pdf = HTML(string=rendered, base_url=request.base_url).write_pdf()
+    response = make_response(pdf)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = f'attachment; filename=CV_{row['nom'].replace(' ', '_')}_classique.pdf'
+    return response
+
+@app.route('/download_etudiant/<int:id>', methods=['GET'])
+def download_etudiant_cv(id):
+    conn = sqlite3.connect("cv_data.db")
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM cvs WHERE id = ?", (id,))
+    row = cursor.fetchone()
+    conn.close()
+    if not row:
+        return "CV introuvable.", 404
+
+    rendered = render_template("cv_etudiant.html", cv=row)
+    pdf = HTML(string=rendered, base_url=request.base_url).write_pdf()
+    response = make_response(pdf)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = f'attachment; filename=CV_{row['nom'].replace(' ', '_')}_etudiant.pdf'
+    return response
+
 if __name__ == '__main__':
+    # Conseils pour le lancement :
+    # 1. Assurez-vous d'avoir installé toutes les dépendances :
+    #    pip install flask python-docx pillow reportlab weasyprint
+    # 2. Si WeasyPrint pose problème, installez les dépendances système :
+    #    - Windows : https://weasyprint.readthedocs.io/en/stable/install.html#windows
+    #    - Linux : sudo apt install libpango-1.0-0 libpangocairo-1.0-0 libcairo2 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info
+    # 3. Lancez l'app dans le terminal :
+    #    python app.py
+    # 4. Accédez à http://127.0.0.1:5000/ dans votre navigateur.
+
     app.run(debug=True)

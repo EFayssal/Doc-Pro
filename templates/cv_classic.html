@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>CV Classique - {{ cv.nom }}</title>
+    <style>
+        html, body {
+            background: #fff;
+            color: #222;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+        }
+        body {
+            /* Supprime tout centrage ou couleur de fond */
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        .cv-main {
+            width: 100vw;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0 0 0 0;
+            background: #fff;
+            border-radius: 0;
+            box-shadow: none;
+        }
+        header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 32px;
+            padding: 36px 36px 0 36px;
+        }
+        .profile-pic {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid #4F46E5;
+            object-fit: cover;
+            margin-right: 32px;
+            background: #e5e7eb;
+        }
+        .header-info h1 {
+            font-size: 2.2em;
+            font-weight: bold;
+            color: #22223b;
+            margin: 0;
+            max-width: 600px;
+            word-break: break-word;
+            white-space: pre-line;
+        }
+        .header-info p {
+            margin: 4px 0 0 0;
+            color: #4B5563;
+            font-size: 1.15em;
+            word-break: break-word;
+            white-space: pre-line;
+        }
+        .header-info .contact {
+            color: #6B7280;
+            margin-top: 10px;
+            font-size: 1em;
+            word-break: break-word;
+            white-space: pre-line;
+        }
+        .section-title {
+            border-bottom: 2px solid #4F46E5;
+            padding-bottom: 4px;
+            margin-bottom: 12px;
+            font-weight: 600;
+            font-size: 1.18em;
+            color: #3730a3;
+            max-width: 800px;
+            word-break: break-word;
+            margin-left: 36px;
+            margin-right: 36px;
+        }
+        section {
+            margin-top: 32px;
+            padding-left: 36px;
+            padding-right: 36px;
+        }
+        ul {
+            margin: 0 0 0 18px;
+            padding: 0;
+        }
+        li {
+            margin-bottom: 6px;
+            word-break: break-word;
+            white-space: pre-line;
+        }
+        .exp-title, .edu-title {
+            font-weight: 600;
+            color: #22223b;
+            margin-bottom: 2px;
+            word-break: break-word;
+            white-space: pre-line;
+        }
+        .exp-date, .edu-date {
+            color: #6B7280;
+            font-size: 0.98em;
+            margin-bottom: 2px;
+            word-break: break-word;
+            white-space: pre-line;
+        }
+        .exp-desc, .edu-desc {
+            color: #374151;
+            font-size: 1em;
+            word-break: break-word;
+            white-space: pre-line;
+        }
+        .section p {
+            word-break: break-word;
+            white-space: pre-line;
+        }
+    </style>
+</head>
+<body>
+  <div class="cv-main">
+    <header>
+      {% if cv.photo %}
+        <img src="{{ url_for('static', filename='uploads/' + cv.photo) }}" alt="Profile Picture" class="profile-pic">
+      {% else %}
+        <div class="profile-pic"></div>
+      {% endif %}
+      <div class="header-info">
+        <h1>{{ cv.nom }}</h1>
+        <p>{{ cv.titre }}</p>
+        <p class="contact">
+          {% if cv.email %}Email: {{ cv.email }}{% endif %}
+          {% if cv.telephone %} | Téléphone: {{ cv.telephone }}{% endif %}
+          {% if cv.ville %} | Ville: {{ cv.ville }}{% endif %}
+        </p>
+      </div>
+    </header>
+
+    {% if cv.profil %}
+    <section>
+      <h2 class="section-title">À propos de moi</h2>
+      <p>{{ cv.profil }}</p>
+    </section>
+    {% endif %}
+
+    {% if cv.competences %}
+    <section>
+      <h2 class="section-title">Compétences</h2>
+      <ul>
+        {% for comp in cv.competences.split(',') %}
+        <li>{{ comp.strip() }}</li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+
+    {% if cv.experiences %}
+    <section>
+      <h2 class="section-title">Expérience</h2>
+      <div>
+        {% for exp in cv.experiences.split('\n') %}
+        {% if exp.strip() %}
+        <div style="margin-bottom:14px;">
+          <div class="exp-title">{{ exp.strip() }}</div>
+        </div>
+        {% endif %}
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
+    {% if cv.formations %}
+    <section>
+      <h2 class="section-title">Formation</h2>
+      <div>
+        {% for form in cv.formations.split('\n') %}
+        {% if form.strip() %}
+        <div style="margin-bottom:10px;">
+          <div class="edu-title">{{ form.strip() }}</div>
+        </div>
+        {% endif %}
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
+    {% if cv.langues %}
+    <section>
+      <h2 class="section-title">Langues</h2>
+      <ul>
+        {% for lang in cv.langues.split(',') %}
+        <li>{{ lang.strip() }}</li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+
+    {% if cv.interets %}
+    <section>
+      <h2 class="section-title">Centres d'intérêt</h2>
+      <ul>
+        {% for interet in cv.interets.split(',') %}
+        <li>{{ interet.strip() }}</li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+  </div>
+</body>
+</html>
