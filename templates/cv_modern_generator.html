@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV Moderne</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Ajout de SortableJS pour le drag & drop -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #797979; /* plus foncé */
+        }
+        
+        .page-a3 {
+            width: 297mm;
+            height: 420mm;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header-bg {
+            background: linear-gradient(135deg, #6e45e2 0%, #89d4cf 100%);
+        }
+        
+        .skill-bar {
+            height: 6px;
+            background-color: #e0e0e0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .skill-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #6e45e2, #89d4cf);
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -20px;
+            top: 0;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #6e45e2;
+        }
+        
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            left: -16px;
+            top: 12px;
+            width: 4px;
+            height: calc(100% - 12px);
+            background: #e0e0e0;
+        }
+        
+        .photo-upload {
+            border: 2px dashed #ccc;
+            transition: all 0.3s;
+        }
+        
+        .photo-upload:hover {
+            border-color: #6e45e2;
+            background-color: #f9f9f9;
+        }
+        
+        .edit-icon {
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .editable-field:hover .edit-icon {
+            opacity: 1;
+        }
+        
+        @media print {
+            body {
+                background: none;
+            }
+            .page-a3 {
+                box-shadow: none;
+                margin: 0;
+                width: 100%;
+                height: 100%;
+            }
+            .no-print, .no-print * {
+                display: none !important;
+            }
+            /* Nouvelle méthode : masquer tout bouton contenant le texte "Supprimer" */
+            button, [role="button"] {
+                /* Masquer tout bouton dont le texte est "Supprimer" */
+                color-adjust: exact;
+            }
+            button.remove-item, button[aria-label="Supprimer"] {
+                display: none !important;
+                visibility: hidden !important;
+            }
+            /* Masquer aussi tout bouton qui contient le mot "Supprimer" (fallback JS) */
+        }
+        
+        @media (max-width: 1024px) {
+            .page-a3 {
+                width: 100%;
+                height: auto;
+            }
+        }
+
+        .draggable-block {
+            cursor: grab;
+            transition: box-shadow 0.2s;
+        }
+        .draggable-block.dragging {
+            box-shadow: 0 0 0 3px #6e45e2;
+            opacity: 0.8;
+        }
+        .draggable-hint {
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(34,34,34,0.97);
+            color: #fff;
+            padding: 12px 28px;
+            border-radius: 999px;
+            font-size: 1.08rem;
+            font-weight: 500;
+            box-shadow: 0 4px 24px rgba(110,69,226,0.12);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            opacity: 0.97;
+            animation: hint-pop 0.7s cubic-bezier(.68,-0.55,.27,1.55), hint-fadeout 1s 3.5s forwards;
+            pointer-events: none;
+        }
+        @keyframes hint-pop {
+            0% { transform: translateX(-50%) scale(0.7);}
+            60% { transform: translateX(-50%) scale(1.1);}
+            100% { transform: translateX(-50%) scale(1);}
+        }
+        @keyframes hint-fadeout {
+            to { opacity: 0; }
+        }
+        .hint-hand {
+            animation: hand-move 1.2s infinite alternate;
+            font-size: 1.5em;
+            display: inline-block;
+        }
+        @keyframes hand-move {
+            0% { transform: translateY(0) rotate(-10deg);}
+            100% { transform: translateY(8px) rotate(10deg);}
+        }
+        .hint-arrow {
+            animation: arrow-move 1.2s infinite alternate;
+            font-size: 1.3em;
+            display: inline-block;
+        }
+        @keyframes arrow-move {
+            0% { transform: translateX(0);}
+            100% { transform: translateX(10px);}
+        }
+        .hint-slider {
+            animation: slider-move 1.2s infinite alternate;
+            font-size: 1.3em;
+            display: inline-block;
+        }
+        @keyframes slider-move {
+            0% { transform: scaleX(1);}
+            100% { transform: scaleX(1.2);}
+        }
+    </style>
+</head>
+<body class="bg-gray-100 py-8" style="background-color:#181a20;">
+    <!-- Animation d'information -->
+    <div id="draggable-hint" class="draggable-hint">
+        <span class="hint-hand">🖐️</span>
+        <span>Astuce : Cliquez et glissez les blocs (<span class="hint-arrow">⬅️➡️</span>) pour réorganiser, ajustez les barres (<span class="hint-slider">🎚️</span>) pour vos niveaux !</span>
+    </div>
+    <div class="container mx-auto px-4">
+        <!-- Contrôles d'édition -->
+        <div class="no-print bg-white p-4 rounded-lg shadow-md mb-6">
+            <h2 class="text-xl font-bold mb-4">Éditeur de CV</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Photo de profil</label>
+                    <input type="file" id="photo-upload" accept="image/*" class="block w-full text-sm text-gray-500
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-md file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-purple-50 file:text-purple-700
+                    hover:file:bg-purple-100">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Couleur principale</label>
+                    <input type="color" id="primary-color" value="#6e45e2" class="w-full h-10">
+                </div>
+            </div>
+        </div>
+        
+        <!-- CV en format A3 -->
+        <div class="page-a3">
+            <!-- En-tête avec photo et infos personnelles -->
+            <div class="header-bg p-8 text-white relative">
+                <div class="absolute top-4 right-4 bg-white bg-opacity-20 rounded-full p-2">
+                    <!-- Ancien bouton de téléchargement -->
+                    <!-- <i class="fas fa-download text-white cursor-pointer no-print" onclick="window.print()"></i> -->
+                    <button id="download-pdf-btn" class="no-print text-white font-bold flex items-center gap-2">
+                        <i class="fas fa-download"></i> Télécharger en PDF
+                    </button>
+                </div>
+                
+                <div class="flex flex-col md:flex-row items-center">
+                    <div class="relative mb-6 md:mb-0 md:mr-8">
+                        <div class="photo-upload w-32 h-32 rounded-full bg-white flex items-center justify-center cursor-pointer overflow-hidden" id="photo-container">
+                            <img id="profile-photo" src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Ccircle cx='40' cy='40' r='38' fill='%23e0e0e0'/%3E%3Cpath fill='%23999999' d='M40 20c5.5 0 10 4.5 10 10s-4.5 10-10 10-10-4.5-10-10 4.5-10 10-10zm0 36c9.9 0 18-8.1 18-18s-8.1-18-18-18-18 8.1-18 18 8.1 18 18 18zm0 4c-12.1 0-22-9.9-22-22s9.9-22 22-22 22 9.9 22 22-9.9 22-22 22z'/%3E%3C/svg%3E" class="w-full h-full object-cover rounded-full">
+                            <div class="absolute inset-0 bg-black bg-opacity-40 rounded-full flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                                <i class="fas fa-camera text-white text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex-1">
+                        <h1 class="text-4xl font-bold mb-2 editable-field">
+                            <span id="fullname">Jean Dupont</span>
+                            <i class="fas fa-pencil-alt edit-icon ml-2 text-sm"></i>
+                        </h1>
+                        <input type="text" id="fullname-input" class="hidden bg-transparent border-b border-white text-white w-full" value="Jean Dupont">
+                        
+                        <h2 class="text-2xl font-light mb-4 editable-field">
+                            <span id="job-title">Développeur Full Stack</span>
+                            <i class="fas fa-pencil-alt edit-icon ml-2 text-sm"></i>
+                        </h2>
+                        <input type="text" id="job-title-input" class="hidden bg-transparent border-b border-white text-white w-full" value="Développeur Full Stack">
+                        
+                        <div class="flex flex-wrap gap-4">
+                            <div class="flex items-center editable-field">
+                                <i class="fas fa-envelope mr-2"></i>
+                                <span id="email">jean.dupont@email.com</span>
+                                <i class="fas fa-pencil-alt edit-icon ml-2 text-sm"></i>
+                            </div>
+                            <input type="email" id="email-input" class="hidden bg-transparent border-b border-white text-white w-full" value="jean.dupont@email.com">
+                            
+                            <div class="flex items-center editable-field">
+                                <i class="fas fa-phone mr-2"></i>
+                                <span id="phone">+33 6 12 34 56 78</span>
+                                <i class="fas fa-pencil-alt edit-icon ml-2 text-sm"></i>
+                            </div>
+                            <input type="tel" id="phone-input" class="hidden bg-transparent border-b border-white text-white w-full" value="+33 6 12 34 56 78">
+                            
+                            <div class="flex items-center editable-field">
+                                <i class="fas fa-map-marker-alt mr-2"></i>
+                                <span id="location">Paris, France</span>
+                                <i class="fas fa-pencil-alt edit-icon ml-2 text-sm"></i>
+                            </div>
+                            <input type="text" id="location-input" class="hidden bg-transparent border-b border-white text-white w-full" value="Paris, France">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Corps du CV -->
+            <div class="p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Colonne de gauche -->
+                <div class="lg:col-span-2">
+                    <!-- À propos -->
+                    <div class="mb-8 draggable-block" data-block="apropos">
+                        <h3 class="text-2xl font-bold mb-4 text-purple-800 flex items-center">
+                            <div class="w-6 h-6 bg-purple-100 rounded-full mr-2 flex items-center justify-center">
+                                <div class="w-3 h-3 bg-purple-600 rounded-full"></div>
+                            </div>
+                            À PROPOS
+                        </h3>
+                        <div class="relative">
+                            <div id="about-text" class="text-gray-700 leading-relaxed editable-text" contenteditable="true">
+                                Développeur passionné avec 5 ans d'expérience dans la création d'applications web modernes. 
+                                Expertise en JavaScript, React et Node.js. Toujours à la recherche de nouvelles technologies 
+                                pour améliorer l'expérience utilisateur et optimiser les performances.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Expérience professionnelle -->
+                    <div class="mb-8 draggable-block" data-block="experiences">
+                        <h3 class="text-2xl font-bold mb-4 text-purple-800 flex items-center">
+                            <div class="w-6 h-6 bg-purple-100 rounded-full mr-2 flex items-center justify-center">
+                                <div class="w-3 h-3 bg-purple-600 rounded-full"></div>
+                            </div>
+                            EXPÉRIENCE PROFESSIONNELLE
+                        </h3>
+                        <div id="experiences-list" class="space-y-6">
+                            <!-- Expériences dynamiques ici -->
+                            <!-- Expérience 1 -->
+                            <div class="pl-6 relative timeline-item dynamic-item bg-gray-50 rounded p-3 mb-2">
+                                <div class="flex justify-between items-start">
+                                    <h4 class="text-xl font-semibold editable-text" contenteditable="true" id="job1-title">Développeur Full Stack</h4>
+                                    <button type="button" class="remove-item text-red-500 ml-2">Supprimer</button>
+                                </div>
+                                <div class="text-gray-600 mb-2 editable-text" contenteditable="true" id="job1-company">Tech Solutions Inc.</div>
+                                <div class="text-gray-500 text-sm mb-3 editable-text" contenteditable="true" id="job1-duration">Janvier 2020 - Présent</div>
+                                <div class="text-gray-700 editable-text" contenteditable="true" id="job1-description">
+                                    - Développement et maintenance d'applications web avec React et Node.js<br>
+                                    - Collaboration avec l'équipe UX/UI pour améliorer l'interface utilisateur<br>
+                                    - Optimisation des performances et résolution de problèmes techniques
+                                </div>
+                            </div>
+                            
+                            <!-- Expérience 2 -->
+                            <div class="pl-6 relative timeline-item dynamic-item bg-gray-50 rounded p-3 mb-2">
+                                <div class="flex justify-between items-start">
+                                    <h4 class="text-xl font-semibold editable-text" contenteditable="true" id="job2-title">Développeur Front-end</h4>
+                                    <button type="button" class="remove-item text-red-500 ml-2">Supprimer</button>
+                                </div>
+                                <div class="text-gray-600 mb-2 editable-text" contenteditable="true" id="job2-company">Web Agency</div>
+                                <div class="text-gray-500 text-sm mb-3 editable-text" contenteditable="true" id="job2-duration">Mars 2018 - Décembre 2019</div>
+                                <div class="text-gray-700 editable-text" contenteditable="true" id="job2-description">
+                                    - Création d'interfaces utilisateur responsive avec HTML5, CSS3 et JavaScript<br>
+                                    - Intégration de maquettes Photoshop et Sketch<br>
+                                    - Participation aux réunions clients pour comprendre les besoins
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" id="add-experience" class="no-print mt-2 text-purple-700 font-bold">+ Ajouter une expérience</button>
+                    </div>
+                    
+                    <!-- Formation -->
+                    <div class="draggable-block" data-block="formation">
+                        <h3 class="text-2xl font-bold mb-4 text-purple-800 flex items-center">
+                            <div class="w-6 h-6 bg-purple-100 rounded-full mr-2 flex items-center justify-center">
+                                <div class="w-3 h-3 bg-purple-600 rounded-full"></div>
+                            </div>
+                            FORMATION
+                        </h3>
+                        <div id="formations-list" class="space-y-6">
+                            <!-- Formations dynamiques ici -->
+                            <!-- Formation 1 -->
+                            <div class="pl-6 relative timeline-item dynamic-item bg-gray-50 rounded p-3 mb-2">
+                                <div class="flex justify-between items-start">
+                                    <h4 class="text-xl font-semibold editable-text" contenteditable="true" id="education1-title">Master en Informatique</h4>
+                                    <button type="button" class="remove-item text-red-500 ml-2">Supprimer</button>
+                                </div>
+                                <div class="text-gray-600 mb-2 editable-text" contenteditable="true" id="education1-school">Université de Paris</div>
+                                <div class="text-gray-500 text-sm mb-3 editable-text" contenteditable="true" id="education1-year">2016 - 2018</div>
+                                <div class="text-gray-700 editable-text" contenteditable="true" id="education1-description">
+                                    Spécialisation en développement web et systèmes distribués. Mémoire sur l'optimisation des performances des applications React.
+                                </div>
+                            </div>
+                            
+                            <!-- Formation 2 -->
+                            <div class="pl-6 relative timeline-item dynamic-item bg-gray-50 rounded p-3 mb-2">
+                                <div class="flex justify-between items-start">
+                                    <h4 class="text-xl font-semibold editable-text" contenteditable="true" id="education2-title">Licence en Informatique</h4>
+                                    <button type="button" class="remove-item text-red-500 ml-2">Supprimer</button>
+                                </div>
+                                <div class="text-gray-600 mb-2 editable-text" contenteditable="true" id="education2-school">Université de Lyon</div>
+                                <div class="text-gray-500 text-sm mb-3 editable-text" contenteditable="true" id="education2-year">2013 - 2016</div>
+                                <div class="text-gray-700 editable-text" contenteditable="true" id="education2-description">
+                                    <!-- Ajoutez votre texte ici -->
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" id="add-formation" class="no-print mt-2 text-purple-700 font-bold">+ Ajouter une formation</button>
+                    </div>
+                </div>
+                
+                <!-- Colonne de droite -->
+                <div id="right-col-draggable">
+                    <!-- Compétences -->
+                    <div class="mb-8 draggable-block" data-block="competences">
+                        <h3 class="text-2xl font-bold mb-4 text-purple-800 flex items-center">
+                            <div class="w-6 h-6 bg-purple-100 rounded-full mr-2 flex items-center justify-center">
+                                <div class="w-3 h-3 bg-purple-600 rounded-full"></div>
+                            </div>
+                            COMPÉTENCES
+                        </h3>
+                        <div id="skills-list" class="space-y-4">
+                            <!-- Compétence 1 -->
+                            <div class="dynamic-item flex flex-col gap-1 mb-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-medium editable-text" contenteditable="true">JavaScript</span>
+                                    <button type="button" class="remove-item text-red-500 no-print">Supprimer</button>
+                                </div>
+                                <div class="skill-bar w-full mx-auto">
+                                    <div class="skill-progress" style="width:90%"></div>
+                                </div>
+                                <input type="range" min="0" max="100" value="90" class="w-full skill-range no-print mx-auto mt-2" style="accent-color:#6e45e2;height:8px;">
+                            </div>
+                            
+                            <!-- Compétence 2 -->
+                            <div class="dynamic-item flex flex-col gap-1 mb-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-medium editable-text" contenteditable="true">React</span>
+                                    <button type="button" class="remove-item text-red-500 no-print">Supprimer</button>
+                                </div>
+                                <div class="skill-bar w-full mx-auto">
+                                    <div class="skill-progress" style="width:85%"></div>
+                                </div>
+                                <input type="range" min="0" max="100" value="85" class="w-full skill-range no-print mx-auto mt-2" style="accent-color:#6e45e2;height:8px;">
+                            </div>
+                            
+                            <!-- Compétence 3 -->
+                            <div class="dynamic-item flex flex-col gap-1 mb-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-medium editable-text" contenteditable="true">Node.js</span>
+                                    <button type="button" class="remove-item text-red-500 no-print">Supprimer</button>
+                                </div>
+                                <div class="skill-bar w-full mx-auto">
+                                    <div class="skill-progress" style="width:80%"></div>
+                                </div>
+                                <input type="range" min="0" max="100" value="80" class="w-full skill-range no-print mx-auto mt-2" style="accent-color:#6e45e2;height:8px;">
+                            </div>
+                            
+                            <!-- Compétence 4 -->
+                            <div class="dynamic-item flex flex-col gap-1 mb-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-medium editable-text" contenteditable="true">HTML/CSS</span>
+                                    <button type="button" class="remove-item text-red-500 no-print">Supprimer</button>
+                                </div>
+                                <div class="skill-bar w-full mx-auto">
+                                    <div class="skill-progress" style="width:95%"></div>
+                                </div>
+                                <input type="range" min="0" max="100" value="95" class="w-full skill-range no-print mx-auto mt-2" style="accent-color:#6e45e2;height:8px;">
+                            </div>
+                            
+                            <!-- Compétence 5 -->
+                            <div class="dynamic-item flex flex-col gap-1 mb-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-medium editable-text" contenteditable="true">MongoDB</span>
+                                    <button type="button" class="remove-item text-red-500 no-print">Supprimer</button>
+                                </div>
+                                <div class="skill-bar w-full mx-auto">
+                                    <div class="skill-progress" style="width:75%"></div>
+                                </div>
+                                <input type="range" min="0" max="100" value="75" class="w-full skill-range no-print mx-auto mt-2" style="accent-color:#6e45e2;height:8px;">
+                            </div>
+                        </div>
+                        <button type="button" id="add-skill" class="no-print mt-2 text-purple-700 font-bold">+ Ajouter une compétence</button>
+                    </div>
+                    
+                    <!-- Langues -->
+                    <div class="mb-8 draggable-block" data-block="langues">
+                        <h3 class="text-2xl font-bold mb-4 text-purple-800 flex items-center">
+                            <div class="w-6 h-6 bg-purple-100 rounded-full mr-2 flex items-center justify-center">
+                                <div class="w-3 h-3 bg-purple-600 rounded-full"></div>
+                            </div>
+                            LANGUES
+                        </h3>
+                        <div id="langues-list" class="space-y-4">
+                            <!-- Langue 1 -->
+                            <div class="dynamic-item flex flex-col gap-1 mb-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-medium editable-text" contenteditable="true">Français</span>
+                                    <button type="button" class="remove-item text-red-500 no-print" aria-label="Supprimer">Supprimer</button>
+                                </div>
+                                <div class="skill-bar w-full mx-auto">
+                                    <div class="skill-progress" style="width:100%"></div>
+                                </div>
+                                <input type="range" min="0" max="100" value="100" class="w-full langue-range no-print mx-auto mt-2" style="accent-color:#6e45e2;height:8px;">
+                            </div>
+                            <!-- Langue 2 -->
+                            <div class="dynamic-item flex flex-col gap-1 mb-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-medium editable-text" contenteditable="true">Anglais</span>
+                                    <button type="button" class="remove-item text-red-500 no-print" aria-label="Supprimer">Supprimer</button>
+                                </div>
+                                <div class="skill-bar w-full mx-auto">
+                                    <div class="skill-progress" style="width:85%"></div>
+                                </div>
+                                <input type="range" min="0" max="100" value="85" class="w-full langue-range no-print mx-auto mt-2" style="accent-color:#6e45e2;height:8px;">
+                            </div>
+                            <!-- Langue 3 -->
+                            <div class="dynamic-item flex flex-col gap-1 mb-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-medium editable-text" contenteditable="true">Espagnol</span>
+                                    <button type="button" class="remove-item text-red-500 no-print" aria-label="Supprimer">Supprimer</button>
+                                </div>
+                                <div class="skill-bar w-full mx-auto">
+                                    <div class="skill-progress" style="width:60%"></div>
+                                </div>
+                                <input type="range" min="0" max="100" value="60" class="w-full langue-range no-print mx-auto mt-2" style="accent-color:#6e45e2;height:8px;">
+                            </div>
+                        </div>
+                        <button type="button" id="add-langue" class="no-print mt-2 text-purple-700 font-bold">+ Ajouter une langue</button>
+                    </div>
+                    
+                    <!-- Centres d'intérêt -->
+                    <div class="draggable-block" data-block="interets">
+                        <h3 class="text-2xl font-bold mb-4 text-purple-800 flex items-center">
+                            <div class="w-6 h-6 bg-purple-100 rounded-full mr-2 flex items-center justify-center">
+                                <div class="w-3 h-3 bg-purple-600 rounded-full"></div>
+                            </div>
+                            CENTRES D'INTÉRÊT
+                        </h3>
+                        
+                        <div id="interets-list" class="flex flex-wrap gap-2">
+                            <!-- Centres d'intérêt dynamiques ici -->
+                            <div class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full editable-field">
+                                <span id="interest1">Voyages</span>
+                                <i class="fas fa-pencil-alt edit-icon ml-1"></i>
+                            </div>
+                            <input type="text" id="interest1-input" class="hidden w-full border-b border-gray-300" value="Voyages">
+                            
+                            <div class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full editable-field">
+                                <span id="interest2">Photographie</span>
+                                <i class="fas fa-pencil-alt edit-icon ml-1"></i>
+                            </div>
+                            <input type="text" id="interest2-input" class="hidden w-full border-b border-gray-300" value="Photographie">
+                            
+                            <div class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full editable-field">
+                                <span id="interest3">Musique</span>
+                                <i class="fas fa-pencil-alt edit-icon ml-1"></i>
+                            </div>
+                            <input type="text" id="interest3-input" class="hidden w-full border-b border-gray-300" value="Musique">
+                            
+                            <div class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full editable-field">
+                                <span id="interest4">Technologie</span>
+                                <i class="fas fa-pencil-alt edit-icon ml-1"></i>
+                            </div>
+                            <input type="text" id="interest4-input" class="hidden w-full border-b border-gray-300" value="Technologie">
+                        </div>
+                        <button type="button" id="add-interest" class="no-print mt-2 text-purple-700 font-bold">+ Ajouter un centre d'intérêt</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="/static/js/cv_pdf.js"></script>
+    <script>
+        // Edition discrète champ par champ
+        document.querySelectorAll('.editable-field').forEach(field => {
+            field.addEventListener('click', function(e) {
+                // Ne pas activer l'édition si on clique sur l'icône elle-même
+                if (e.target.classList.contains('fa-pencil-alt')) return;
+                // Trouver le span ou p éditable
+                let span = this.querySelector('span') || this.querySelector('p');
+                let id = span ? span.id : null;
+                let input = id ? document.getElementById(id + '-input') : null;
+                if (span && input) {
+                    span.classList.add('hidden');
+                    input.classList.remove('hidden');
+                    input.focus();
+                    // Copier le texte actuel dans l'input
+                    input.value = span.textContent;
+                    // Validation à la sortie de l'input
+                    function validateEdit() {
+                        span.textContent = input.value;
+                        span.classList.remove('hidden');
+                        input.classList.add('hidden');
+                        input.removeEventListener('blur', validateEdit);
+                        input.removeEventListener('keypress', keyHandler);
+                    }
+                    function keyHandler(e) {
+                        if (e.key === 'Enter') {
+                            validateEdit();
+                        }
+                    }
+                    input.addEventListener('blur', validateEdit);
+                    input.addEventListener('keypress', keyHandler);
+                }
+            });
+        });
+
+        // Gestion des barres de compétences
+        document.querySelectorAll('input[type="range"]').forEach(range => {
+            range.addEventListener('input', function() {
+                const progressBar = document.getElementById(this.id.replace('-input', ''));
+                progressBar.style.width = `${this.value}%`;
+            });
+        });
+
+        // Upload de photo
+        const photoUpload = document.getElementById('photo-upload');
+        const profilePhoto = document.getElementById('profile-photo');
+        photoUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    profilePhoto.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Gestion de la couleur principale
+        const primaryColor = document.getElementById('primary-color');
+        primaryColor.addEventListener('input', function() {
+            document.documentElement.style.setProperty('--tw-gradient-from', this.value);
+            document.documentElement.style.setProperty('--tw-gradient-to', '#89d4cf');
+            document.querySelectorAll('.text-purple-800').forEach(el => {
+                el.style.color = this.value;
+            });
+            document.querySelectorAll('.bg-purple-600').forEach(el => {
+                el.style.backgroundColor = this.value;
+            });
+            document.querySelectorAll('.skill-progress').forEach(el => {
+                el.style.background = `linear-gradient(90deg, ${this.value}, #89d4cf)`;
+            });
+            document.querySelector('.header-bg').style.background = `linear-gradient(135deg, ${this.value} 0%, #89d4cf 100%)`;
+        });
+
+        // Permettre le clic sur le conteneur de photo pour upload
+        document.getElementById('photo-container').addEventListener('click', function() {
+            photoUpload.click();
+        });
+
+        // Empêcher le bouton PDF d'apparaître dans le PDF (déjà fait via .no-print)
+        // Génération PDF fidèle à la page (déjà fait via /static/js/cv_pdf.js)
+
+        // --- Ajout dynamique ---
+        function addSection(sectionId, templateId) {
+            const section = document.getElementById(sectionId);
+            const template = document.getElementById(templateId);
+            const clone = template.content.cloneNode(true);
+            section.appendChild(clone);
+        }
+
+        document.getElementById('add-experience').onclick = function() {
+            addSection('experiences-list', 'experience-template');
+        };
+        document.getElementById('add-formation').onclick = function() {
+            addSection('formations-list', 'formation-template');
+        };
+        document.getElementById('add-skill').onclick = function() {
+            addSection('skills-list', 'skill-template');
+        };
+        document.getElementById('add-langue').onclick = function() {
+            addSection('langues-list', 'langue-template');
+        };
+        document.getElementById('add-interest').onclick = function() {
+            addSection('interets-list', 'interest-template');
+        };
+
+        // --- Suppression dynamique ---
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-item')) {
+                e.target.closest('.dynamic-item').remove();
+            }
+        });
+
+        // --- Barre de progression dynamique pour compétences/langues ---
+        document.addEventListener('input', function(e) {
+            if (e.target.classList.contains('skill-range') || e.target.classList.contains('langue-range')) {
+                const percent = e.target.value;
+                const progress = e.target.parentNode.querySelector('.skill-progress');
+                if (progress) progress.style.width = percent + '%';
+            }
+        });
+
+        // --- Edition inline pour tous les textes (contenteditable) ---
+        // Rien à faire, contenteditable gère l'édition directe
+
+        // Drag & drop pour les blocs principaux (langues, compétences, etc.)
+        document.addEventListener('DOMContentLoaded', function() {
+            // Pour la colonne de droite (langues, compétences, interets)
+            const rightCol = document.getElementById('right-col-draggable');
+            if (rightCol) {
+                Sortable.create(rightCol, {
+                    animation: 200,
+                    handle: '.draggable-block',
+                    draggable: '.draggable-block',
+                    ghostClass: 'dragging'
+                });
+            }
+            // Pour la colonne de gauche (à propos, expériences, formation)
+            const leftCol = document.querySelector('.lg\\:col-span-2');
+            if (leftCol) {
+                Sortable.create(leftCol, {
+                    animation: 200,
+                    handle: '.draggable-block',
+                    draggable: '.draggable-block',
+                    ghostClass: 'dragging'
+                });
+            }
+        });
+
+        // Masquer l'animation d'aide après 4.5s
+        setTimeout(function() {
+            var hint = document.getElementById('draggable-hint');
+            if (hint) hint.style.display = 'none';
+        }, 4500);
+    </script>
+
+    <!-- Templates pour duplication dynamique -->
+    <template id="experience-template">
+        <div class="pl-6 relative timeline-item dynamic-item bg-gray-50 rounded p-3 mb-2">
+            <div class="flex justify-between items-start">
+                <h4 class="text-xl font-semibold editable-text" contenteditable="true">Intitulé du poste</h4>
+                <button type="button" class="remove-item text-red-500 ml-2">Supprimer</button>
+            </div>
+            <div class="text-gray-600 mb-2 editable-text" contenteditable="true">Entreprise</div>
+            <div class="text-gray-500 text-sm mb-3 editable-text" contenteditable="true">Dates</div>
+            <div class="text-gray-700 editable-text" contenteditable="true">Description du poste (cliquez pour éditer)</div>
+        </div>
+    </template>
+    <template id="formation-template">
+        <div class="pl-6 relative timeline-item dynamic-item bg-gray-50 rounded p-3 mb-2">
+            <div class="flex justify-between items-start">
+                <h4 class="text-xl font-semibold editable-text" contenteditable="true">Diplôme</h4>
+                <button type="button" class="remove-item text-red-500 ml-2">Supprimer</button>
+            </div>
+            <div class="text-gray-600 mb-2 editable-text" contenteditable="true">École</div>
+            <div class="text-gray-500 text-sm mb-3 editable-text" contenteditable="true">Années</div>
+            <div class="text-gray-700 editable-text" contenteditable="true">Description (cliquez pour éditer)</div>
+        </div>
+    </template>
+    <template id="skill-template">
+        <div class="dynamic-item flex flex-col gap-1 mb-2">
+            <div class="flex items-center gap-2">
+                <span class="font-medium editable-text" contenteditable="true">Nouvelle compétence</span>
+                <button type="button" class="remove-item text-red-500 no-print">Supprimer</button>
+            </div>
+            <div class="skill-bar w-full mx-auto">
+                <div class="skill-progress" style="width:80%"></div>
+            </div>
+            <input type="range" min="0" max="100" value="80" class="w-full skill-range no-print mx-auto mt-1" style="accent-color:#6e45e2;height:3px;">
+        </div>
+    </template>
+    <template id="langue-template">
+        <div class="dynamic-item flex flex-col gap-1 mb-2">
+            <div class="flex items-center gap-2">
+                <span class="font-medium editable-text" contenteditable="true">Nouvelle langue</span>
+                <button type="button" class="remove-item text-red-500 no-print" aria-label="Supprimer">Supprimer</button>
+            </div>
+            <div class="skill-bar w-full mx-auto">
+                <div class="skill-progress" style="width:60%"></div>
+            </div>
+            <input type="range" min="0" max="100" value="60" class="w-full langue-range no-print mx-auto mt-1" style="accent-color:#6e45e2;height:3px;">
+        </div>
+    </template>
+    <template id="interest-template">
+        <div class="dynamic-item px-3 py-1 bg-purple-100 text-purple-800 rounded-full flex items-center gap-2 mb-2">
+            <span class="editable-text" contenteditable="true">Nouveau centre d'intérêt</span>
+            <button type="button" class="remove-item text-red-500">Supprimer</button>
+        </div>
+    </template>
+</body>
+<div style="width:100vw;position:fixed;left:0;bottom:0;text-align:center;color:#888;font-size:0.98rem;opacity:0.7;letter-spacing:0.03em;z-index:999;" class="no-print">
+    ©2025 Fayssal EL HOUARI
+</div>
+</html>

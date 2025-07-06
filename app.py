@@ -43,7 +43,6 @@ def generate_cv():
         return "Vous devez accepter la politique de traitement des données.", 400
 
     # Récupération des données
-    modele = request.form.get("modele", "fayssal")  # <-- Correction ici, valeur par défaut = moderne
     theme = request.form.get("theme", "classique")
     nom = request.form.get("nom", "").strip()
     age = request.form.get("age", "").strip()
@@ -80,8 +79,7 @@ def generate_cv():
             competences TEXT,
             langues TEXT,
             formations TEXT,
-            interets TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            interets TEXT
         )
     ''')
     c.execute('''
@@ -89,20 +87,7 @@ def generate_cv():
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''', (nom, age, titre, ville, email, telephone, profil, experiences, competences, langues, formations, interets))
     conn.commit()
-    cv_id = c.lastrowid  # Récupère l'ID du CV inséré
     conn.close()
-
-    format = request.form.get("format", "docx")  # Default format is docx
-
-    # Si PDF et modèle moderne, redirige vers la route moderne
-    if format == "pdf" and modele == "fayssal":
-        return redirect(url_for('download_modern_cv', id=cv_id))
-    # Si PDF et modèle classique, redirige vers la route classique
-    if format == "pdf" and modele == "classique":
-        return redirect(url_for('download_classic_cv', id=cv_id))
-    # Si PDF et modèle étudiant, redirige vers la route étudiant
-    if format == "pdf" and modele == "etudiant":
-        return redirect(url_for('download_etudiant_cv', id=cv_id))
 
     # Récupération de la photo
     photo = request.files.get("photo")
@@ -184,6 +169,8 @@ def generate_cv():
         doc.add_heading("Centres d'intérêt", level=1)
         for interest in filter(None, (i.strip() for i in interets.split(','))):
             doc.add_paragraph(f"• {interest}", style='List Bullet')
+
+    format = request.form.get("format", "docx")  # Default format is docx
 
     if format == "pdf":
         # Generate PDF
@@ -689,41 +676,9 @@ def download_modern_cv(id):
     response.headers['Content-Disposition'] = f'attachment; filename=CV_{row["nom"].replace(" ", "_")}_modern.pdf'
     return response
 
-@app.route('/download_classic/<int:id>', methods=['GET'])
-def download_classic_cv(id):
-    conn = sqlite3.connect("cv_data.db")
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM cvs WHERE id = ?", (id,))
-    row = cursor.fetchone()
-    conn.close()
-    if not row:
-        return "CV introuvable.", 404
-
-    rendered = render_template("cv_classic.html", cv=row)
-    pdf = HTML(string=rendered, base_url=request.base_url).write_pdf()
-    response = make_response(pdf)
-    response.headers['Content-Type'] = 'application/pdf'
-    response.headers['Content-Disposition'] = f'attachment; filename=CV_{row['nom'].replace(' ', '_')}_classique.pdf'
-    return response
-
-@app.route('/download_etudiant/<int:id>', methods=['GET'])
-def download_etudiant_cv(id):
-    conn = sqlite3.connect("cv_data.db")
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM cvs WHERE id = ?", (id,))
-    row = cursor.fetchone()
-    conn.close()
-    if not row:
-        return "CV introuvable.", 404
-
-    rendered = render_template("cv_etudiant.html", cv=row)
-    pdf = HTML(string=rendered, base_url=request.base_url).write_pdf()
-    response = make_response(pdf)
-    response.headers['Content-Type'] = 'application/pdf'
-    response.headers['Content-Disposition'] = f'attachment; filename=CV_{row['nom'].replace(' ', '_')}_etudiant.pdf'
-    return response
+@app.route('/cv_modern_generator')
+def cv_modern_generator():
+    return render_template('cv_modern_generator.html')
 
 if __name__ == '__main__':
     # Conseils pour le lancement :

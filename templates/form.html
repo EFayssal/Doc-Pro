@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Créateur de CV</title>
+    <title>Générer une lettre de motivation</title>
     <link rel="stylesheet" href="/static/styles.css">
     <style>
         body {
@@ -27,7 +27,6 @@
             flex-direction: column;
             align-items: center;
             transition: box-shadow 0.3s;
-            margin-left: 80px; /* Décale le formulaire pour laisser la place à la barre */
         }
         .apple-card:hover {
             box-shadow: 0 16px 64px 0 rgba(0,255,170,0.18), 0 2px 12px 0 rgba(0,0,0,0.13);
@@ -39,13 +38,18 @@
             color: #00ffae;
             margin-bottom: 8px;
             text-align: center;
-            font-family: 'SF Pro Display', 'Segoe UI', Arial, sans-serif;
         }
         h4 {
             font-size: 1.1rem;
             color: #b0b0b0;
             font-weight: 400;
             margin-bottom: 32px;
+            text-align: center;
+        }
+        .info-text {
+            color: #b0ffdf;
+            font-size: 1.08rem;
+            margin-bottom: 18px;
             text-align: center;
         }
         form {
@@ -469,113 +473,11 @@
     </style>
 </head>
 <body>
-    <div class="theme-toggle">
-        <input type="checkbox" id="theme-switch">
-        <label class="toggle-label" for="theme-switch"></label>
-        <span class="toggle-icon sun" title="Clair">☀️</span>
-        <span class="toggle-icon moon" title="Sombre">🌙</span>
-    </div>
-    <div class="progress-container">
-        <div class="progress-step active" id="step-1">1</div>
-        <div class="progress-label">Informations<br>personnelles</div>
-        <div class="progress-step" id="step-2">2</div>
-        <div class="progress-label">Expérience</div>
-        <div class="progress-step" id="step-3">3</div>
-        <div class="progress-label">Compétences</div>
-        <div class="progress-bar-bg">
-            <div class="progress-bar-fill" id="progress-bar-fill" style="height: 33%;"></div>
-        </div>
-    </div>
-    <div class="apple-card">
-        <h2>Création de CV</h2>
-        <h4>Veuillez remplir ces champs pour créer votre CV</h4>
-        <form id="cv-form" action="/generate" method="post" enctype="multipart/form-data">
-            <label for="nom">Nom :</label>
-            <input type="text" id="nom" name="nom" required>
-
-            <label for="age">Âge :</label>
-            <input type="text" id="age" name="age" required>
-
-            <label for="titre">Titre :</label>
-            <input type="text" id="titre" name="titre">
-
-            <label for="ville">Ville :</label>
-            <input type="text" id="ville" name="ville">
-
-            <label for="email">Email :</label>
-            <input type="email" id="email" name="email">
-
-            <label for="telephone">Téléphone :</label>
-            <input type="text" id="telephone" name="telephone">
-
-            <label for="profil">Profil :</label>
-            <textarea id="profil" name="profil" rows="4" placeholder="Décrivez votre parcours, vos objectifs..."></textarea>
-
-            <label for="experiences">Expériences :</label>
-            <textarea id="experiences" name="experiences" rows="5" placeholder="Ex : Vendeur – Emmaüs-Brie – 2023-2024&#10;• Conseil client&#10;• Mise en rayon..."></textarea>
-
-            <label for="competences">Compétences :</label>
-            <textarea id="competences" name="competences" rows="3" placeholder="Séparez par des virgules (ex : Accueil, Bureautique, Électronique...)"></textarea>
-
-            <label for="langues">Langues :</label>
-            <textarea id="langues" name="langues" rows="2" placeholder="Français (courant), Anglais (B1)..."></textarea>
-
-            <label for="formations">Formations :</label>
-            <textarea id="formations" name="formations" rows="3" placeholder="Ex : 2022 – Bac Pro Vente – Lycée Flora Tristan"></textarea>
-
-            <label for="interets">Centres d'intérêt :</label>
-            <textarea id="interets" name="interets" rows="2" placeholder="Ex : Sport, Réseaux sociaux, Musique..."></textarea>
-
-            <label for="modele">Modèle de CV :</label>
-            <select id="modele" name="modele" required>
-                <option value="fayssal">Moderne (par défaut)</option>
-                <option value="classique">Classique</option>
-                <option value="etudiant">Étudiant</option>
-            </select>
-
-            <label class="checkbox-label">
-                <input type="checkbox" id="consentement" name="consentement" required>
-                <span>J'accepte que mes données soient utilisées pour générer mon CV.</span>
-            </label>
-
-            <label for="photo">Photo de profil :</label>
-            <input type="file" id="photo" name="photo" accept="image/*">
-
-            <button type="button" onclick="genererApercu()">Aperçu du CV</button>
-            
-            <div class="btn-container">
-                <button class="btn-format" type="submit" name="format" value="docx">Télécharger en Word (.docx)</button>
-                <button class="btn-format pdf" type="submit" name="format" value="pdf">Télécharger en PDF</button>
-            </div>
-            
-            <div id="cv-preview">
-                <h2 id="preview-nom"></h2>
-                <p id="preview-titre"></p>
-                <p id="preview-coordonnees"></p>
-                <h3>Profil</h3>
-                <p id="preview-profil"></p>
-                <h3>Expériences</h3>
-                <ul id="preview-experiences"></ul>
-                <h3>Compétences</h3>
-                <ul id="preview-competences"></ul>
-                <h3>Langues</h3>
-                <ul id="preview-langues"></ul>
-                <h3>Formation</h3>
-                <ul id="preview-formations"></ul>
-                <h3>Centres d'intérêt</h3>
-                <ul id="preview-interets"></ul>
-            </div>
-        </form>
-    </div>
-
-    <!-- Floating button for uploading a photo -->
-    <label class="floating-btn" for="photo">
-        📷
-        <input type="file" id="photo" name="photo" accept="image/*">
-    </label>
-
     <div class="apple-card" id="motivation-card" style="margin-top:40px;">
         <h2>Générer une lettre de motivation</h2>
+        <div class="info-text">
+            Remplissez les champs ci-dessous pour générer instantanément une lettre de motivation professionnelle, personnalisée et prête à télécharger.
+        </div>
         <form id="motivation-form" style="width:100%;display:flex;flex-direction:column;gap:18px;">
             <label for="lm-nom">Nom complet :</label>
             <input type="text" id="lm-nom" name="lm-nom" required placeholder="Ex : Jean Dupont">
@@ -618,168 +520,8 @@
             </div>
         </form>
     </div>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script>
-        function genererApercu() {
-            // Vérifier le consentement
-            if (!document.getElementById('consentement').checked) {
-                alert("Veuillez accepter les conditions d'utilisation");
-                return;
-            }
-
-            document.getElementById("cv-preview").style.display = "block";
-
-            // Nom et âge
-            const nom = document.getElementById('nom').value;
-            const age = document.getElementById('age').value;
-            document.getElementById("preview-nom").textContent = nom + (age ? ` – ${age} ans` : '');
-
-            // Titre
-            document.getElementById("preview-titre").textContent = document.getElementById('titre').value;
-
-            // Coordonnées
-            const ville = document.getElementById('ville').value;
-            const email = document.getElementById('email').value;
-            const telephone = document.getElementById('telephone').value;
-            
-            let coordonnees = [];
-            if (ville) coordonnees.push(`📍 ${ville}`);
-            if (email) coordonnees.push(`📧 ${email}`);
-            if (telephone) coordonnees.push(`📞 ${telephone}`);
-            
-            document.getElementById("preview-coordonnees").innerHTML = coordonnees.join('<br>');
-
-            // Profil
-            document.getElementById("preview-profil").textContent = document.getElementById('profil').value;
-
-            // Remplir les listes
-            remplirListe("experiences", "preview-experiences", '\n');
-            remplirListe("competences", "preview-competences", ',');
-            remplirListe("langues", "preview-langues", ',');
-            remplirListe("formations", "preview-formations", '\n');
-            remplirListe("interets", "preview-interets", ',');
-        }
-
-        function remplirListe(champ, cible, separateur) {
-            const ul = document.getElementById(cible);
-            ul.innerHTML = "";
-            const texte = document.getElementById(champ).value;
-            
-            if (!texte.trim()) return;
-            
-            const elements = texte.split(separateur)
-                                 .filter(el => el.trim())
-                                 .map(el => el.trim());
-            
-            elements.forEach(el => {
-                const li = document.createElement("li");
-                li.textContent = el;
-                ul.appendChild(li);
-            });
-        }
-
-        // Progress bar logic
-        const fieldsStep1 = ['nom', 'age', 'titre', 'ville', 'email', 'telephone'];
-        const fieldsStep2 = ['profil', 'experiences', 'formations', 'interets'];
-        const fieldsStep3 = ['competences', 'langues'];
-
-        function getStep() {
-            // Step 1: If any personal info is empty, stay at 1
-            for (let id of fieldsStep1) {
-                if (!document.getElementById(id).value.trim()) return 1;
-            }
-            // Step 2: If any exp/form/profil/interets is empty, stay at 2
-            for (let id of fieldsStep2) {
-                if (!document.getElementById(id).value.trim()) return 2;
-            }
-            // Step 3: If any comp/lang is empty, stay at 3
-            for (let id of fieldsStep3) {
-                if (!document.getElementById(id).value.trim()) return 3;
-            }
-            // All filled
-            return 3;
-        }
-
-        function updateProgressBar() {
-            const step = getStep();
-            // Steps
-            for (let i = 1; i <= 3; i++) {
-                const el = document.getElementById('step-' + i);
-                if (i < step) {
-                    el.classList.add('completed');
-                    el.classList.remove('active');
-                } else if (i === step) {
-                    el.classList.add('active');
-                    el.classList.remove('completed');
-                } else {
-                    el.classList.remove('active');
-                    el.classList.remove('completed');
-                }
-            }
-            // Bar fill
-            let percent = 33;
-            if (step === 2) percent = 66;
-            if (step === 3) percent = 100;
-            document.getElementById('progress-bar-fill').style.height = percent + "%";
-        }
-
-        // Correction focus label: surligne le label du champ focus
-        document.addEventListener('DOMContentLoaded', function() {
-            // Pour tous les inputs et textarea du formulaire
-            document.querySelectorAll('#cv-form input, #cv-form textarea, #cv-form select').forEach(function(input) {
-                input.addEventListener('focus', function() {
-                    // Retire la classe sur tous les labels
-                    document.querySelectorAll('#cv-form label').forEach(function(lab) {
-                        lab.classList.remove('label-focused');
-                    });
-                    // Ajoute la classe sur le label lié à ce champ
-                    var label = document.querySelector('label[for="' + input.id + '"]');
-                    if (label) label.classList.add('label-focused');
-                });
-                input.addEventListener('blur', function() {
-                    var label = document.querySelector('label[for="' + input.id + '"]');
-                    if (label) label.classList.remove('label-focused');
-                });
-            });
-        });
-
-        // Attach input listeners
-        document.addEventListener('DOMContentLoaded', function() {
-            const allFields = [...fieldsStep1, ...fieldsStep2, ...fieldsStep3];
-            for (let id of allFields) {
-                const el = document.getElementById(id);
-                if (el) {
-                    el.addEventListener('input', updateProgressBar);
-                }
-            }
-            updateProgressBar();
-        });
-
-        // Dark/Light mode toggle
-        document.addEventListener('DOMContentLoaded', function() {
-            const toggle = document.getElementById('theme-switch');
-            const body = document.body;
-            const card = document.querySelector('.apple-card');
-            // Restore theme from localStorage if present
-            if (localStorage.getItem('theme') === 'light') {
-                body.classList.add('light');
-                card.classList.add('light');
-                toggle.checked = true;
-            }
-            toggle.addEventListener('change', function() {
-                if (toggle.checked) {
-                    body.classList.add('light');
-                    card.classList.add('light');
-                    localStorage.setItem('theme', 'light');
-                } else {
-                    body.classList.remove('light');
-                    card.classList.remove('light');
-                    localStorage.setItem('theme', 'dark');
-                }
-            });
-        });
-
         function generateMotivationLetter(nom, adresse, ville, email, tel, dateVille, sujet, competences, experience, qualites) {
             // Utilise des balises <b> pour les champs demandés et ajoute des espaces entre les lignes
             let headerLeft = `<b>${nom}</b><br><br><b>${adresse}</b><br><br><b>${ville}</b><br><br><b>${email}</b><br><br><b>Tél : ${tel}</b><br><br><b>${dateVille}</b>`;
@@ -893,6 +635,6 @@
     </script>
 </body>
 <div style="width:100vw;position:fixed;left:0;bottom:0;text-align:center;color:#888;font-size:0.98rem;opacity:0.7;letter-spacing:0.03em;z-index:999;">
-    ©2025 Fayssal EL HOUARI
+    ©2025 Fayssal EL HOUARI 
 </div>
 </html>

@@ -3,7 +3,7 @@
 cv_app est une application web qui permet de créer, gérer et personnaliser des CV et des lettres de motivation facilement.
 
 ## Nouveautés
-
+- **Maj des interfaces utilisateurs L'integration du JS Le Cv_Moderne est entièrement personalisable , infos, Couleurs, position, barre de compétences réglable**
 - **Génération d’une lettre de motivation** en plus du CV.
 - **Modification, suppression et téléchargement** des lettres de motivation et des CV.
 - **Suppression en masse** des enregistrements pour un gain de temps et une meilleure gestion.
@@ -56,7 +56,8 @@ Cette application a pour objectif de vous aider à concevoir un ou plusieurs CV 
 
 Voici une image illustrative :
 
-![Image](https://github.com/user-attachments/assets/d54ffbb9-a8de-46db-8a17-7745a0660b19)
----
+![Image](https://github.com/user-attachments/assets/d363a247-ba8c-4b82-9323-2dbed8454d62)
+
+![Image2](https://github.com/user-attachments/assets/3ce9bbfb-7feb-40d5-a64a-0b38685d42d0)
 
 Merci d’utiliser cv_app !
