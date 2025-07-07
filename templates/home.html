@@ -135,19 +135,23 @@
         <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
             <!-- Moderne -->
             <div class="rounded-2xl bg-gradient-to-br from-purple-700/80 to-indigo-900/80 p-8 shadow-xl hover:scale-105 transition-all duration-200 cursor-pointer cv-model-block group" data-model="fayssal" style="position:relative;">
-                <img src="/static/cv_modern_sample.png" alt="Modèle Moderne" class="w-full rounded-lg mb-4 shadow-md modern-preview-img transition-all duration-300 group-hover:scale-110 group-hover:shadow-2xl" style="height:180px;object-fit:cover;">
+                <img src="/static/cv_modern_sample.png" alt="Modèle Moderne" class="w-full rounded-lg mb-4 shadow-md modern-preview-img transition-all duration-300 group-hover:scale-125 group-hover:z-20 group-hover:shadow-2xl" style="height:180px;object-fit:cover;">
                 <h3 class="text-xl font-bold mb-2 text-white">Moderne</h3>
                 <p class="text-gray-200">Design professionnel, couleurs modernes, parfait pour tous secteurs.</p>
-                <!-- Image preview on hover -->
+                <!-- Image preview agrandie sur hover -->
                 <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" style="background:rgba(30,30,40,0.93);border-radius:16px;">
-                    <img src="/static/cv_modern_sample.png" alt="Aperçu Modèle Moderne" style="max-width:90%;max-height:90%;border-radius:12px;box-shadow:0 0 24px #00ffae88;">
+                    <img src="/static/cv_modern_sample.png" alt="Aperçu Modèle Moderne" style="max-width:98%;max-height:98%;border-radius:12px;box-shadow:0 0 32px #764ba299;transform:scale(1.25);transition:transform 0.3s;">
                 </div>
             </div>
             <!-- Classique -->
-            <div class="rounded-2xl bg-gradient-to-br from-blue-700/80 to-cyan-900/80 p-8 shadow-xl hover:scale-105 transition-all duration-200 cursor-pointer cv-model-block" data-model="classique">
-                <img src="/static/cv_classic_sample.png" alt="Modèle Classique" class="w-full rounded-lg mb-4 shadow-md" style="height:180px;object-fit:cover;">
+            <div class="rounded-2xl bg-gradient-to-br from-blue-700/80 to-cyan-900/80 p-8 shadow-xl hover:scale-105 transition-all duration-200 cursor-pointer cv-model-block group" data-model="classique" style="position:relative;">
+                <img src="/static/cv_classic_sample.jpg" alt="Modèle Classique" class="w-full rounded-lg mb-4 shadow-md transition-all duration-300 group-hover:scale-125 group-hover:z-20 group-hover:shadow-2xl" style="height:180px;object-fit:cover;">
                 <h3 class="text-xl font-bold mb-2 text-white">Classique</h3>
                 <p class="text-gray-200">Sobre, efficace, idéal pour les candidatures traditionnelles.</p>
+                <!-- Image preview agrandie sur hover -->
+                <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" style="background:rgba(30,30,40,0.93);border-radius:16px;">
+                    <img src="/static/cv_classic_sample.jpg" alt="Aperçu Modèle Classique" style="max-width:98%;max-height:98%;border-radius:12px;box-shadow:0 0 32px #667eea99;transform:scale(1.25);transition:transform 0.3s;">
+                </div>
             </div>
             <!-- Créatif -->
             <div class="rounded-2xl bg-gradient-to-br from-green-700/80 to-emerald-900/80 p-8 shadow-xl hover:scale-105 transition-all duration-200 cursor-pointer cv-model-block" data-model="etudiant">
@@ -230,8 +234,10 @@
                 // Redirige immédiatement vers la page concernée
                 if (selectedModel === "fayssal" || selectedModel === "moderne") {
                     window.location.href = "/cv_modern_generator";
-                } else if (selectedModel === "classique" || selectedModel === "etudiant") {
-                    window.location.href = "/form?modele=" + selectedModel;
+                } else if (selectedModel === "classique") {
+                    window.location.href = "/cv_classic_editable";
+                } else if (selectedModel === "etudiant") {
+                    window.location.href = "/cv_creatif_generator";
                 }
             });
         });
@@ -255,4 +261,5 @@
 </body>
 <div style="width:100vw;position:fixed;left:0;bottom:0;text-align:center;color:#888;font-size:0.98rem;opacity:0.7;letter-spacing:0.03em;z-index:999;">
     ©2025 Fayssal EL HOUARI
+</div>
 </html>

@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV Moderne</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Ajout de SortableJS pour le drag & drop -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;600;700&family=Montserrat:wght@400;600&display=swap');
+        :root {
+            --classic-primary: #222;
+            --classic-secondary: #667eea;
+            --classic-bg: #fff;
+            --classic-font: 'EB Garamond', serif;
+        }
+        body {
+            font-family: var(--classic-font, 'EB Garamond', serif);
+            background: #f5f5f5;
+        }
+        .classic-a4 {
+            width: 210mm;
+            min-height: 297mm;
+            max-width: 210mm;
+            margin: 0 auto;
+            background: var(--classic-bg, #fff);
+            box-shadow: 0 0 12px #bbb;
+            border-radius: 8px;
+            padding: 10mm 10mm 10mm 10mm;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+        .classic-columns {
+            display: flex;
+            flex-direction: row;
+            gap: 24px;
+        }
+        .classic-col-left {
+            flex: 1.1 1 0;
+            min-width: 0;
+            max-width: 48%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .classic-col-right {
+            flex: 0.9 1 0;
+            min-width: 0;
+            max-width: 44%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .classic-header {
+            border-bottom: 2px solid #222;
+            padding-bottom: 10px;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+        .classic-photo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #bbb;
+            background: #f7f7f7;
+            box-shadow: 0 2px 8px #0001;
+        }
+        .classic-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.7rem;
+            font-weight: 700;
+            color: var(--classic-primary, #222);
+            margin-bottom: 2px;
+            letter-spacing: 0.01em;
+        }
+        .classic-job {
+            font-size: 1rem;
+            color: var(--classic-secondary, #667eea);
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        .classic-contact {
+            font-size: 0.95rem;
+            color: #444;
+            margin-top: 6px;
+        }
+        .classic-section-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--classic-primary, #222);
+            border-bottom: 1px solid #e0e0e0;
+            margin-bottom: 7px;
+            padding-bottom: 1px;
+            letter-spacing: 0.02em;
+        }
+        .classic-section {
+            margin-bottom: 10px;
+        }
+        .classic-list {
+            margin: 0;
+            padding: 0 0 0 14px;
+            font-size: 0.97rem;
+            color: #222;
+        }
+        .classic-list li {
+            margin-bottom: 2px;
+        }
+        .classic-skill-bar {
+            height: 6px;
+            background: #ececec;
+            border-radius: 4px;
+            margin-top: 2px;
+            margin-bottom: 6px;
+            overflow: hidden;
+        }
+        .classic-skill-progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--classic-primary, #222) 60%, var(--classic-secondary, #667eea) 100%);
+            border-radius: 4px;
+            transition: width 0.7s cubic-bezier(.4,2,.3,1);
+        }
+        .classic-exp-title {
+            font-weight: 600;
+            color: #222;
+            font-size: 1.01rem;
+        }
+        .classic-exp-company {
+            color: var(--classic-secondary, #667eea);
+            font-size: 0.95rem;
+            font-style: italic;
+        }
+        .classic-exp-date {
+            color: #888;
+            font-size: 0.93rem;
+            margin-left: 8px;
+        }
+        .classic-exp-desc {
+            color: #333;
+            font-size: 0.95rem;
+            margin-top: 2px;
+        }
+        .classic-footer {
+            border-top: 1px solid #e0e0e0;
+            margin-top: 10px;
+            padding-top: 7px;
+            font-size: 0.93rem;
+            color: #888;
+            text-align: center;
+            letter-spacing: 0.03em;
+        }
+        .classic-badge {
+            display: inline-block;
+            background: #ececec;
+            color: var(--classic-secondary, #667eea);
+            border-radius: 12px;
+            padding: 2px 10px;
+            font-size: 0.95rem;
+            margin-right: 5px;
+            margin-bottom: 3px;
+        }
+        .classic-lang-bar {
+            height: 5px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            margin-top: 2px;
+            margin-bottom: 6px;
+            overflow: hidden;
+        }
+        .classic-lang-progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--classic-secondary, #667eea) 70%, #bbb 100%);
+            border-radius: 4px;
+            transition: width 0.7s cubic-bezier(.4,2,.3,1);
+        }
+        .classic-slider {
+            width: 120px;
+            height: 18px;
+            accent-color: #222;
+            margin-left: 10px;
+            vertical-align: middle;
+            border-radius: 999px;
+        }
+        .classic-slider::-webkit-slider-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #222;
+            border: 2px solid #bbb;
+            cursor: pointer;
+            box-shadow: 0 2px 6px #0002;
+            transition: background 0.2s;
+        }
+        .classic-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #222;
+            border: 2px solid #bbb;
+            cursor: pointer;
+            box-shadow: 0 2px 6px #0002;
+            transition: background 0.2s;
+        }
+        .classic-slider::-ms-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #222;
+            border: 2px solid #bbb;
+            cursor: pointer;
+            box-shadow: 0 2px 6px #0002;
+            transition: background 0.2s;
+        }
+        .classic-slider:focus {
+            outline: none;
+        }
+        .classic-slider::-webkit-slider-thumb:hover {
+            background: #444;
+        }
+        .classic-slider::-moz-range-thumb:hover {
+            background: #444;
+        }
+        .classic-slider::-ms-thumb:hover {
+            background: #444;
+        }
+        .classic-remove-btn {
+            background: #fff;
+            color: #c00;
+            border: 1px solid #eee;
+            border-radius: 50%;
+            width: 26px;
+            height: 26px;
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-left: 10px;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+            vertical-align: middle;
+        }
+        .classic-remove-btn:hover {
+            background: #fbeaea;
+            color: #900;
+        }
+        .classic-add-btn {
+            background: #f5f5f5;
+            color: #222;
+            border: 1px solid #ddd;
+            border-radius: 18px;
+            padding: 3px 16px;
+            font-size: 1em;
+            font-weight: 500;
+            margin-top: 4px;
+            margin-bottom: 2px;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+        .classic-add-btn:hover {
+            background: #ececec;
+            color: #111;
+        }
+        .theme-panel {
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            z-index: 100;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px #0002;
+            padding: 18px 22px 18px 22px;
+            min-width: 220px;
+            display: none;
+        }
+        .theme-panel label {
+            font-size: 1em;
+            font-weight: 500;
+            margin-bottom: 6px;
+            display: block;
+        }
+        .theme-panel input[type="color"] {
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            margin-right: 12px;
+            cursor: pointer;
+            background: none;
+            box-shadow: 0 2px 8px #0001;
+        }
+        .theme-panel select {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 4px 12px;
+            font-size: 1em;
+            margin-left: 8px;
+        }
+        .theme-panel .close-btn {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            background: none;
+            border: none;
+            font-size: 1.2em;
+            color: #888;
+            cursor: pointer;
+        }
+        .theme-btn {
+            position: absolute;
+            top: 18px;
+            left: 18px;
+            z-index: 101;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px #0001;
+            padding: 7px 14px;
+            font-size: 1.1em;
+            color: #222;
+            cursor: pointer;
+            border: 1px solid #eee;
+            transition: background 0.2s;
+        }
+        .theme-btn:hover {
+            background: #f3f3f3;
+        }
+        @media (max-width: 900px) {
+            .classic-columns {
+                flex-direction: column;
+                gap: 0;
+            }
+            .classic-col-left, .classic-col-right {
+                max-width: 100%;
+            }
+        }
+        @media print {
+            body {
+                background: none;
+            }
+            .classic-a4 {
+                box-shadow: none;
+                margin: 0;
+                width: 210mm !important;
+                min-height: 297mm !important;
+                max-width: 210mm !important;
+                border-radius: 0;
+                padding: 10mm 10mm 10mm 10mm !important;
+            }
+            .classic-columns {
+                flex-direction: row !important;
+                gap: 24px !important;
+            }
+            .classic-col-left, .classic-col-right {
+                max-width: 48% !important;
+            }
+            .no-print, .no-print * {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Bouton d'ouverture du panneau thème -->
+    <button class="theme-btn no-print" onclick="document.getElementById('themePanel').style.display='block'">
+        <i class="fas fa-palette mr-1"></i> Thème & Police
+    </button>
+    <!-- Panneau de personnalisation thème/couleur/police -->
+    <div id="themePanel" class="theme-panel no-print">
+        <button class="close-btn" onclick="document.getElementById('themePanel').style.display='none'">&times;</button>
+        <label>
+            Couleur principale :
+            <input type="color" id="primaryColorPicker" value="#222">
+        </label>
+        <label>
+            Couleur secondaire :
+            <input type="color" id="secondaryColorPicker" value="#667eea">
+        </label>
+        <label>
+        </label>
+        <label>
+            Police :
+            <select id="fontFamilyPicker">
+                <option value="'EB Garamond', serif">EB Garamond (Classique)</option>
+                <option value="'Montserrat', sans-serif">Montserrat (Moderne)</option>
+                <option value="'Poppins', sans-serif">Poppins</option>
+                <option value="'Roboto', sans-serif">Roboto</option>
+                <option value="'Georgia', serif">Georgia</option>
+                <option value="'Arial', sans-serif">Arial</option>
+            </select>
+        </label>
+    </div>
+    <div class="container mx-auto px-2 py-4" style="padding:0 !important;">
+        <div class="classic-a4" id="cv-container">
+            <!-- Header -->
+            <div class="classic-header">
+                <div style="position:relative;display:flex;align-items:center;gap:18px;">
+                    <div style="position:relative;">
+                        <img id="photoPreview" src="https://via.placeholder.com/90" alt="Photo de profil" class="classic-photo" style="border:2.5px solid #667eea;">
+                        <label for="photoUpload" class="no-print absolute bottom-0 right-0 bg-white shadow-md rounded-full p-1.5 cursor-pointer hover:bg-blue-100 transition-all border border-blue-200" style="transform:translate(30%,30%);">
+                            <i class="fas fa-camera text-blue-600"></i>
+                            <input type="file" id="photoUpload" accept="image/*" class="hidden">
+                        </label>
+                    </div>
+                </div>
+                <div>
+                    <div class="classic-title" id="name" contenteditable="true">Jean Dupont</div>
+                    <div class="classic-job" id="job-title" contenteditable="true">Développeur Full Stack</div>
+                    <div class="classic-contact">
+                        <span id="email" contenteditable="true">jean.dupont@email.com</span> |
+                        <span id="phone" contenteditable="true">+33 6 12 34 56 78</span> |
+                        <span id="location" contenteditable="true">Paris, France</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Colonnes principales -->
+            <div class="classic-columns">
+                <!-- Colonne gauche -->
+                <div class="classic-col-left">
+                    <!-- About -->
+                    <div class="classic-section">
+                        <div class="classic-section-title">Profil</div>
+                        <div id="about-text" contenteditable="true" style="font-size:1.01rem;color:#222;">
+                            Développeur Full Stack passionné avec 5 ans d'expérience dans la création d'applications web performantes. Expertise en JavaScript, React, Node.js et bases de données. Passionné par la résolution de problèmes complexes et la création d'expériences utilisateur exceptionnelles.
+                        </div>
+                    </div>
+                    <!-- Skills -->
+                    <div class="classic-section">
+                        <div class="classic-section-title flex items-center justify-between">
+                            <span>Compétences</span>
+                            <button type="button" id="add-skill-btn" class="classic-add-btn no-print">+ Ajouter</button>
+                        </div>
+                        <ul class="classic-list" id="skills-list">
+                            <li>
+                                <span contenteditable="true">JavaScript/TypeScript</span>
+                                <input type="range" min="0" max="100" value="90" class="classic-slider skill-slider" />
+                                <button type="button" class="classic-remove-btn no-print" onclick="removeItem(this)" title="Supprimer">×</button>
+                                <div class="classic-skill-bar"><div class="classic-skill-progress" style="width:90%"></div></div>
+                            </li>
+                            <li>
+                                <span contenteditable="true">React/Redux</span>
+                                <input type="range" min="0" max="100" value="85" class="classic-slider skill-slider" />
+                                <button type="button" class="classic-remove-btn no-print" onclick="removeItem(this)" title="Supprimer">×</button>
+                                <div class="classic-skill-bar"><div class="classic-skill-progress" style="width:85%"></div></div>
+                            </li>
+                            <li>
+                                <span contenteditable="true">Node.js</span>
+                                <input type="range" min="0" max="100" value="80" class="classic-slider skill-slider" />
+                                <button type="button" class="classic-remove-btn no-print" onclick="removeItem(this)" title="Supprimer">×</button>
+                                <div class="classic-skill-bar"><div class="classic-skill-progress" style="width:80%"></div></div>
+                            </li>
+                            <li>
+                                <span contenteditable="true">HTML/CSS</span>
+                                <input type="range" min="0" max="100" value="95" class="classic-slider skill-slider" />
+                                <button type="button" class="classic-remove-btn no-print" onclick="removeItem(this)" title="Supprimer">×</button>
+                                <div class="classic-skill-bar"><div class="classic-skill-progress" style="width:95%"></div></div>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- Languages -->
+                    <div class="classic-section">
+                        <div class="classic-section-title flex items-center justify-between">
+                            <span>Langues</span>
+                            <button type="button" id="add-lang-btn" class="classic-add-btn no-print">+ Ajouter</button>
+                        </div>
+                        <ul class="classic-list" id="languages-list">
+                            <li>
+                                <span contenteditable="true">Français</span>
+                                <input type="range" min="0" max="100" value="100" class="classic-slider lang-slider" />
+                                <button type="button" class="classic-remove-btn no-print" onclick="removeItem(this)" title="Supprimer">×</button>
+                                <div class="classic-lang-bar"><div class="classic-lang-progress" style="width:100%"></div></div>
+                            </li>
+                            <li>
+                                <span contenteditable="true">Anglais</span>
+                                <input type="range" min="0" max="100" value="85" class="classic-slider lang-slider" />
+                                <button type="button" class="classic-remove-btn no-print" onclick="removeItem(this)" title="Supprimer">×</button>
+                                <div class="classic-lang-bar"><div class="classic-lang-progress" style="width:85%"></div></div>
+                            </li>
+                            <li>
+                                <span contenteditable="true">Espagnol</span>
+                                <input type="range" min="0" max="100" value="60" class="classic-slider lang-slider" />
+                                <button type="button" class="classic-remove-btn no-print" onclick="removeItem(this)" title="Supprimer">×</button>
+                                <div class="classic-lang-bar"><div class="classic-lang-progress" style="width:60%"></div></div>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- Interests -->
+                    <div class="classic-section">
+                        <div class="classic-section-title flex items-center justify-between">
+                            <span>Centres d'intérêt</span>
+                            <button type="button" id="add-interest-btn" class="classic-add-btn no-print">+ Ajouter</button>
+                        </div>
+                        <div id="interests-list">
+                            <span class="classic-badge" contenteditable="true">Voyages <button type="button" class="classic-remove-btn no-print" onclick="removeItem(this)" title="Supprimer">×</button></span>
+                            <span class="classic-badge" contenteditable="true">Photographie <button type="button" class="classic-remove-btn no-print" onclick="removeItem(this)" title="Supprimer">×</button></span>
+                            <span class="classic-badge" contenteditable="true">Musique <button type="button" class="classic-remove-btn no-print" onclick="removeItem(this)" title="Supprimer">×</button></span>
+                            <span class="classic-badge" contenteditable="true">Technologie <button type="button" class="classic-remove-btn no-print" onclick="removeItem(this)" title="Supprimer">×</button></span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Colonne droite -->
+                <div class="classic-col-right">
+                    <!-- Experience -->
+                    <div class="classic-section">
+                        <div class="classic-section-title flex items-center justify-between">
+                            <span>Expérience Professionnelle</span>
+                            <button type="button" id="add-exp-btn" class="classic-add-btn no-print">+ Ajouter</button>
+                        </div>
+                        <ul class="classic-list" id="experience-list">
+                            <li>
+                                <div class="classic-exp-title" contenteditable="true">Développeur Full Stack</div>
+                                <span class="classic-exp-company" contenteditable="true">Tech Solutions Inc.</span>
+                                <span class="classic-exp-date" contenteditable="true">2020 - Présent</span>
+                                <button type="button" class="classic-remove-btn no-print" onclick="removeItem(this)" title="Supprimer">×</button>
+                                <div class="classic-exp-desc" contenteditable="true">
+                                    Développement et maintenance d'applications web avec React et Node.js. Collaboration avec l'équipe produit pour implémenter de nouvelles fonctionnalités. Optimisation des performances et résolution des problèmes techniques.
+                                </div>
+                            </li>
+                            <li>
+                                <div class="classic-exp-title" contenteditable="true">Développeur Frontend</div>
+                                <span class="classic-exp-company" contenteditable="true">Web Creators</span>
+                                <span class="classic-exp-date" contenteditable="true">2018 - 2020</span>
+                                <button type="button" class="classic-remove-btn no-print" onclick="removeItem(this)" title="Supprimer">×</button>
+                                <div class="classic-exp-desc" contenteditable="true">
+                                    Création d'interfaces utilisateur réactives avec React et Redux. Intégration avec les API backend. Participation aux revues de code et amélioration des processus de développement.
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- Education -->
+                    <div class="classic-section">
+                        <div class="classic-section-title flex items-center justify-between">
+                            <span>Formation</span>
+                            <button type="button" id="add-edu-btn" class="classic-add-btn no-print">+ Ajouter</button>
+                        </div>
+                        <ul class="classic-list" id="education-list">
+                            <li>
+                                <div class="classic-exp-title" contenteditable="true">Master en Informatique</div>
+                                <span class="classic-exp-company" contenteditable="true">Université Paris-Saclay</span>
+                                <span class="classic-exp-date" contenteditable="true">2016 - 2018</span>
+                                <button type="button" class="classic-remove-btn no-print" onclick="removeItem(this)" title="Supprimer">×</button>
+                                <div class="classic-exp-desc" contenteditable="true">
+                                    Spécialisation en développement web et architectures logicielles. Mémoire sur les frameworks JavaScript modernes.
+                                </div>
+                            </li>
+                            <li>
+                                <div class="classic-exp-title" contenteditable="true">Licence en Informatique</div>
+                                <span class="classic-exp-company" contenteditable="true">Université Paris Descartes</span>
+                                <span class="classic-exp-date" contenteditable="true">2013 - 2016</span>
+                                <button type="button" class="classic-remove-btn no-print" onclick="removeItem(this)" title="Supprimer">×</button>
+                                <div class="classic-exp-desc" contenteditable="true">
+                                    Fondamentaux de la programmation, algorithmique et structures de données. Projets pratiques en Java et C++.
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <!-- Footer -->
+            <div class="classic-footer" style="border:none;padding:0;margin:0;height:1px;color:transparent;">.</div>
+        </div>
+        <!-- Bouton de téléchargement PDF visible et fonctionnel -->
+        <div class="flex justify-center mt-8">
+            <button id="downloadPdf" class="no-print bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-700 hover:to-blue-700 text-white font-semibold py-3 px-8 rounded-full shadow-lg transition-all duration-200 flex items-center gap-3 text-lg tracking-wide group focus:outline-none focus:ring-2 focus:ring-blue-400">
+                <span class="animate-bounce mr-2"><i class="fas fa-download"></i></span>
+                <span>Télécharger PDF</span>
+            </button>
+        </div>
+        <!-- Copyright -->
+        <div class="w-full text-center text-gray-400 text-sm mt-8 mb-2 select-none" style="letter-spacing:0.03em;">
+            ©2025 Fayssal EL HOUARI - CV Classic
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        // PDF download (A4, style propre)
+        document.getElementById('downloadPdf').addEventListener('click', function() {
+            const element = document.getElementById('cv-container');
+            const buttons = document.querySelectorAll('.no-print');
+            buttons.forEach(btn => btn.style.display = 'none');
+            const original = {
+                background: element.style.background,
+                boxShadow: element.style.boxShadow,
+                width: element.style.width,
+                minHeight: element.style.minHeight,
+                maxWidth: element.style.maxWidth,
+                margin: element.style.margin,
+                padding: element.style.padding,
+                borderRadius: element.style.borderRadius
+            };
+            element.style.background = "#fff";
+            element.style.boxShadow = "none";
+            element.style.width = "210mm";
+            element.style.minHeight = "297mm";
+            element.style.maxWidth = "210mm";
+            element.style.margin = "0 auto";
+            element.style.padding = "10mm 10mm 10mm 10mm";
+            element.style.borderRadius = "0";
+            // Animation feedback
+            const btn = this;
+            btn.disabled = true;
+            btn.classList.add('opacity-60');
+            btn.querySelector('span').classList.add('animate-spin');
+            const opt = {
+                margin: 0,
+                filename: 'CV_classique.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, backgroundColor: "#fff", scrollY: 0 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            setTimeout(function() {
+                html2pdf().set(opt).from(element).save().then(() => {
+                    buttons.forEach(btn => btn.style.display = '');
+                    element.style.background = original.background;
+                    element.style.boxShadow = original.boxShadow;
+                    element.style.width = original.width;
+                    element.style.minHeight = original.minHeight;
+                    element.style.maxWidth = original.maxWidth;
+                    element.style.margin = original.margin;
+                    element.style.padding = original.padding;
+                    element.style.borderRadius = original.borderRadius;
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-60');
+                    btn.querySelector('span').classList.remove('animate-spin');
+                });
+            }, 150);
+        });
+
+        // Photo upload (live preview)
+        document.getElementById('photoUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.getElementById('photoPreview').src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Animation des barres de compétences/langues au chargement
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.classic-skill-progress').forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 200);
+            });
+            document.querySelectorAll('.classic-lang-progress').forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 200);
+            });
+        });
+
+        // Ajout dynamique
+        document.getElementById('add-skill-btn').onclick = function() {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <span contenteditable="true">Nouvelle compétence</span>
+                <input type="range" min="0" max="100" value="80" class="classic-slider skill-slider" />
+                <button type="button" class="classic-remove-btn no-print" onclick="removeItem(this)" title="Supprimer">×</button>
+                <div class="classic-skill-bar"><div class="classic-skill-progress" style="width:80%"></div></div>
+            `;
+            document.getElementById('skills-list').appendChild(li);
+        };
+        document.getElementById('add-lang-btn').onclick = function() {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <span contenteditable="true">Nouvelle langue</span>
+                <input type="range" min="0" max="100" value="60" class="classic-slider lang-slider" />
+                <button type="button" class="classic-remove-btn no-print" onclick="removeItem(this)" title="Supprimer">×</button>
+                <div class="classic-lang-bar"><div class="classic-lang-progress" style="width:60%"></div></div>
+            `;
+            document.getElementById('languages-list').appendChild(li);
+        };
+        document.getElementById('add-exp-btn').onclick = function() {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <div class="classic-exp-title" contenteditable="true">Nouveau poste</div>
+                <span class="classic-exp-company" contenteditable="true">Entreprise</span>
+                <span class="classic-exp-date" contenteditable="true">Année</span>
+                <button type="button" class="classic-remove-btn no-print" onclick="removeItem(this)" title="Supprimer">×</button>
+                <div class="classic-exp-desc" contenteditable="true">Description du poste</div>
+            `;
+            document.getElementById('experience-list').appendChild(li);
+        };
+        document.getElementById('add-edu-btn').onclick = function() {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <div class="classic-exp-title" contenteditable="true">Nouveau diplôme</div>
+                <span class="classic-exp-company" contenteditable="true">Établissement</span>
+                <span class="classic-exp-date" contenteditable="true">Année</span>
+                <button type="button" class="classic-remove-btn no-print" onclick="removeItem(this)" title="Supprimer">×</button>
+                <div class="classic-exp-desc" contenteditable="true">Description de la formation</div>
+            `;
+            document.getElementById('education-list').appendChild(li);
+        };
+        document.getElementById('add-interest-btn').onclick = function() {
+            const span = document.createElement('span');
+            span.className = "classic-badge";
+            span.contentEditable = "true";
+            span.innerHTML = `Nouveau centre d'intérêt <button type="button" class="classic-remove-btn no-print" onclick="removeItem(this)" title="Supprimer">×</button>`;
+            document.getElementById('interests-list').appendChild(span);
+        };
+
+        // Suppression dynamique
+        function removeItem(btn) {
+            const li = btn.closest('li') || btn.closest('span');
+            if (li) li.remove();
+        }
+
+        // Slider dynamique pour compétences/langues
+        document.addEventListener('input', function(e) {
+            if (e.target.classList.contains('skill-slider')) {
+                const percent = e.target.value;
+                const bar = e.target.parentNode.querySelector('.classic-skill-progress');
+                if (bar) bar.style.width = percent + '%';
+            }
+            if (e.target.classList.contains('lang-slider')) {
+                const percent = e.target.value;
+                const bar = e.target.parentNode.querySelector('.classic-lang-progress');
+                if (bar) bar.style.width = percent + '%';
+            }
+        });
+
+        // Thème dynamique
+        document.getElementById('primaryColorPicker').oninput = function() {
+            document.documentElement.style.setProperty('--classic-primary', this.value);
+        };
+        document.getElementById('secondaryColorPicker').oninput = function() {
+            document.documentElement.style.setProperty('--classic-secondary', this.value);
+        };
+        document.getElementById('bgColorPicker') && (document.getElementById('bgColorPicker').oninput = function() {
+            document.documentElement.style.setProperty('--classic-bg', this.value);
+        });
+
+        // Correction : appliquer la police à tout le CV (body + .classic-a4) et via CSS variable
+        document.getElementById('fontFamilyPicker').onchange = function() {
+            document.documentElement.style.setProperty('--classic-font', this.value);
+            document.body.style.fontFamily = this.value;
+            var cv = document.getElementById('cv-container');
+            if (cv) cv.style.fontFamily = this.value;
+            // Forcer tous les descendants à hériter la police (utile pour certains navigateurs)
+            if (cv) {
+                cv.querySelectorAll('*').forEach(function(el) {
+                    el.style.fontFamily = this.value;
+                }, this);
+            }
+        };
+    </script>
+</body>
+</html>

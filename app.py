@@ -680,6 +680,14 @@ def download_modern_cv(id):
 def cv_modern_generator():
     return render_template('cv_modern_generator.html')
 
+@app.route('/cv_classic_editable')
+def cv_classic_editable():
+    return render_template('cv_classic_editable.html')
+
+@app.route('/cv_creatif_generator')
+def cv_creatif_generator():
+    return render_template('cv_creatif_generator.html')
+
 if __name__ == '__main__':
     # Conseils pour le lancement :
     # 1. Assurez-vous d'avoir installé toutes les dépendances :

@@ -95,12 +95,15 @@
             .no-print, .no-print * {
                 display: none !important;
             }
-            /* Nouvelle méthode : masquer tout bouton contenant le texte "Supprimer" */
+            /* Masquer tous les boutons "Supprimer" même sans classe */
             button, [role="button"] {
                 /* Masquer tout bouton dont le texte est "Supprimer" */
-                color-adjust: exact;
+                /* Sélecteur plus strict pour tous les boutons contenant "Supprimer" */
+                /* Fallback JS aussi présent */
+                /* Ajout : masquer tout bouton qui contient "Supprimer" dans son texte */
             }
-            button.remove-item, button[aria-label="Supprimer"] {
+            button.remove-item, button[aria-label="Supprimer"], button, [role="button"] {
+                /* Masquer tout bouton dont le texte est "Supprimer" */
                 display: none !important;
                 visibility: hidden !important;
             }
@@ -302,7 +305,7 @@
                             <div class="pl-6 relative timeline-item dynamic-item bg-gray-50 rounded p-3 mb-2">
                                 <div class="flex justify-between items-start">
                                     <h4 class="text-xl font-semibold editable-text" contenteditable="true" id="job1-title">Développeur Full Stack</h4>
-                                    <button type="button" class="remove-item text-red-500 ml-2">Supprimer</button>
+                                    <button type="button" class="remove-item text-red-500 ml-2 no-print">Supprimer</button>
                                 </div>
                                 <div class="text-gray-600 mb-2 editable-text" contenteditable="true" id="job1-company">Tech Solutions Inc.</div>
                                 <div class="text-gray-500 text-sm mb-3 editable-text" contenteditable="true" id="job1-duration">Janvier 2020 - Présent</div>
@@ -317,7 +320,7 @@
                             <div class="pl-6 relative timeline-item dynamic-item bg-gray-50 rounded p-3 mb-2">
                                 <div class="flex justify-between items-start">
                                     <h4 class="text-xl font-semibold editable-text" contenteditable="true" id="job2-title">Développeur Front-end</h4>
-                                    <button type="button" class="remove-item text-red-500 ml-2">Supprimer</button>
+                                    <button type="button" class="remove-item text-red-500 ml-2 no-print">Supprimer</button>
                                 </div>
                                 <div class="text-gray-600 mb-2 editable-text" contenteditable="true" id="job2-company">Web Agency</div>
                                 <div class="text-gray-500 text-sm mb-3 editable-text" contenteditable="true" id="job2-duration">Mars 2018 - Décembre 2019</div>
@@ -345,7 +348,7 @@
                             <div class="pl-6 relative timeline-item dynamic-item bg-gray-50 rounded p-3 mb-2">
                                 <div class="flex justify-between items-start">
                                     <h4 class="text-xl font-semibold editable-text" contenteditable="true" id="education1-title">Master en Informatique</h4>
-                                    <button type="button" class="remove-item text-red-500 ml-2">Supprimer</button>
+                                    <button type="button" class="remove-item text-red-500 ml-2 no-print">Supprimer</button>
                                 </div>
                                 <div class="text-gray-600 mb-2 editable-text" contenteditable="true" id="education1-school">Université de Paris</div>
                                 <div class="text-gray-500 text-sm mb-3 editable-text" contenteditable="true" id="education1-year">2016 - 2018</div>
@@ -358,7 +361,7 @@
                             <div class="pl-6 relative timeline-item dynamic-item bg-gray-50 rounded p-3 mb-2">
                                 <div class="flex justify-between items-start">
                                     <h4 class="text-xl font-semibold editable-text" contenteditable="true" id="education2-title">Licence en Informatique</h4>
-                                    <button type="button" class="remove-item text-red-500 ml-2">Supprimer</button>
+                                    <button type="button" class="remove-item text-red-500 ml-2 no-print">Supprimer</button>
                                 </div>
                                 <div class="text-gray-600 mb-2 editable-text" contenteditable="true" id="education2-school">Université de Lyon</div>
                                 <div class="text-gray-500 text-sm mb-3 editable-text" contenteditable="true" id="education2-year">2013 - 2016</div>
@@ -689,6 +692,22 @@
             var hint = document.getElementById('draggable-hint');
             if (hint) hint.style.display = 'none';
         }, 4500);
+
+        // Juste avant impression/PDF : masquer tous les boutons "Supprimer" restants
+        function hideSupprimerButtons() {
+            document.querySelectorAll('button, [role="button"]').forEach(btn => {
+                if (btn.textContent && btn.textContent.trim().toLowerCase().includes('supprimer')) {
+                    btn.style.display = 'none';
+                    btn.style.visibility = 'hidden';
+                }
+            });
+        }
+        // Pour impression classique
+        window.addEventListener('beforeprint', hideSupprimerButtons);
+        // Pour html2pdf.js (si utilisé)
+        if (window.html2pdf) {
+            document.addEventListener('html2pdfStart', hideSupprimerButtons);
+        }
     </script>
 
     <!-- Templates pour duplication dynamique -->
@@ -696,7 +715,7 @@
         <div class="pl-6 relative timeline-item dynamic-item bg-gray-50 rounded p-3 mb-2">
             <div class="flex justify-between items-start">
                 <h4 class="text-xl font-semibold editable-text" contenteditable="true">Intitulé du poste</h4>
-                <button type="button" class="remove-item text-red-500 ml-2">Supprimer</button>
+                <button type="button" class="remove-item text-red-500 ml-2 no-print">Supprimer</button>
             </div>
             <div class="text-gray-600 mb-2 editable-text" contenteditable="true">Entreprise</div>
             <div class="text-gray-500 text-sm mb-3 editable-text" contenteditable="true">Dates</div>
@@ -707,7 +726,7 @@
         <div class="pl-6 relative timeline-item dynamic-item bg-gray-50 rounded p-3 mb-2">
             <div class="flex justify-between items-start">
                 <h4 class="text-xl font-semibold editable-text" contenteditable="true">Diplôme</h4>
-                <button type="button" class="remove-item text-red-500 ml-2">Supprimer</button>
+                <button type="button" class="remove-item text-red-500 ml-2 no-print">Supprimer</button>
             </div>
             <div class="text-gray-600 mb-2 editable-text" contenteditable="true">École</div>
             <div class="text-gray-500 text-sm mb-3 editable-text" contenteditable="true">Années</div>
@@ -741,11 +760,11 @@
     <template id="interest-template">
         <div class="dynamic-item px-3 py-1 bg-purple-100 text-purple-800 rounded-full flex items-center gap-2 mb-2">
             <span class="editable-text" contenteditable="true">Nouveau centre d'intérêt</span>
-            <button type="button" class="remove-item text-red-500">Supprimer</button>
+            <button type="button" class="remove-item text-red-500 no-print">Supprimer</button>
         </div>
     </template>
 </body>
 <div style="width:100vw;position:fixed;left:0;bottom:0;text-align:center;color:#888;font-size:0.98rem;opacity:0.7;letter-spacing:0.03em;z-index:999;" class="no-print">
-    ©2025 Fayssal EL HOUARI
+    ©2025 Fayssal EL HOUARI - Cv Moderne 
 </div>
 </html>

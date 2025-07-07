@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV Créatif</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;600;700&display=swap');
+        
+        :root {
+            --primary-color: #3b82f6;
+            --secondary-color: #1e40af;
+            --accent-color: #10b981;
+            --text-color: #1f2937;
+            --light-color: #f9fafb;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-color);
+            background: linear-gradient(135deg, #e0e7ff 0%, #f0fdf4 100%);
+        }
+        
+        .cv-container {
+            background: linear-gradient(120deg, var(--primary-color) 0%, var(--light-color) 100%);
+            /* plus de fond blanc par défaut */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .profile-image {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .skill-bar {
+            height: 10px;
+            border-radius: 5px;
+            background-color: #e5e7eb;
+            overflow: hidden;
+        }
+        
+        .skill-progress {
+            height: 100%;
+            background-color: var(--primary-color);
+            transition: width 0.5s ease;
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding-left: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .timeline-item:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 5px;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+        }
+        
+        .timeline-item:after {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 20px;
+            width: 1px;
+            height: calc(100% - 15px);
+            background-color: #d1d5db;
+        }
+        
+        .timeline-item:last-child:after {
+            display: none;
+        }
+        
+        .color-picker {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+        .color-picker h3 {
+            margin-bottom: 10px;
+            font-size: 14px;
+            text-align: center;
+        }
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+        .color-option {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid #eee;
+            transition: transform 0.2s, border 0.2s;
+        }
+        .color-option.selected,
+        .color-option:hover {
+            border: 2px solid #333;
+            transform: scale(1.1);
+        }
+        
+        .block-controls {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .block-controls button {
+            font-size: 1.1em;
+            background: #f3f4f6;
+            border: none;
+            border-radius: 6px;
+            padding: 2px 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .block-controls button:hover {
+            background: #e5e7eb;
+        }
+        
+        /* For A3 PDF export */
+        @page {
+            size: A3;
+            margin: 0;
+        }
+        
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .cv-container, .cv-container * {
+                visibility: visible;
+            }
+            .cv-container {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                box-shadow: none;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+        
+        /* Creative elements */
+        .creative-shape {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+            opacity: 0.1;
+            z-index: 0;
+        }
+        
+        .shape-1 {
+            background: var(--primary-color);
+            top: -50px;
+            right: -50px;
+            animation: float 8s ease-in-out infinite;
+        }
+        
+        .shape-2 {
+            background: var(--accent-color);
+            bottom: -50px;
+            left: -50px;
+            animation: float 6s ease-in-out infinite reverse;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+                border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+            }
+            50% {
+                transform: translate(-20px, 20px) rotate(180deg);
+                border-radius: 70% 30% 30% 70% / 70% 70% 30% 30%;
+            }
+            100% {
+                transform: translate(0, 0) rotate(360deg);
+                border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+            }
+        }
+        
+        .tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            background-color: var(--light-color);
+            margin-right: 5px;
+            margin-bottom: 5px;
+            font-size: 12px;
+        }
+        
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--light-color);
+            color: var(--primary-color);
+            transition: all 0.3s;
+        }
+        
+        .social-icon:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateY(-3px);
+        }
+        
+        .progress-handle {
+            width: 15px;
+            height: 15px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            position: absolute;
+            right: -5px;
+            top: -2px;
+            cursor: ew-resize;
+        }
+        .color-panel {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            z-index: 100;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px #0002;
+            padding: 18px 22px 18px 22px;
+            min-width: 220px;
+            display: block; /* visible par défaut */
+        }
+        .color-panel label {
+            font-size: 1em;
+            font-weight: 500;
+            margin-bottom: 6px;
+            display: block;
+        }
+        .color-panel input[type="color"] {
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            margin-right: 12px;
+            cursor: pointer;
+            background: none;
+            box-shadow: 0 2px 8px #0001;
+        }
+        .color-panel input[type="range"] {
+            width: 100px;
+            margin-left: 10px;
+        }
+        .color-panel .close-btn {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            background: none;
+            border: none;
+            font-size: 1.2em;
+            color: #888;
+            cursor: pointer;
+        }
+        .editable-block, .editable-project, .editable-formation, .editable-experience {
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .editable-block:focus-within, .editable-block.editing,
+        .editable-project:focus-within, .editable-project.editing,
+        .editable-formation:focus-within, .editable-formation.editing,
+        .editable-experience:focus-within, .editable-experience.editing {
+            background: #f3f4f6;
+            outline: 2px solid #3b82f6;
+        }
+        .edit-btn {
+            background: #e5e7eb;
+            border: none;
+            border-radius: 6px;
+            padding: 2px 8px;
+            margin-left: 8px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .edit-btn:hover {
+            background: #d1d5db;
+        }
+        .skill-bar, .skill-progress {
+            cursor: pointer;
+        }
+        .skill-progress.animated {
+            transition: width 1.2s cubic-bezier(.4,2,.3,1);
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="max-w-6xl mx-auto">
+        <div class="flex justify-between items-center mb-8 no-print">
+            <h1 class="text-3xl font-bold text-gray-800">CV Créatif</h1>
+            <div class="flex space-x-4">
+                <button id="downloadBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-all flex items-center">
+                    <i class="fas fa-download mr-2"></i> Télécharger PDF
+                </button>
+                <button id="openColorPanel" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg transition-all flex items-center">
+                    <i class="fas fa-palette mr-2"></i> Couleurs
+                </button>
+            </div>
+        </div>
+
+        <!-- Nouveau panneau de personnalisation couleurs -->
+        <div id="colorPanel" class="color-panel no-print">
+            <button class="close-btn" onclick="document.getElementById('colorPanel').style.display='none'">&times;</button>
+            <label>Couleur principale :
+                <input type="color" id="primaryColorPicker" value="#3b82f6">
+            </label>
+            <label>Couleur secondaire :
+                <input type="color" id="secondaryColorPicker" value="#1e40af">
+            </label>
+            <label>Accent :
+                <input type="color" id="accentColorPicker" value="#10b981">
+            </label>
+            <label>Fond clair :
+                <input type="color" id="lightColorPicker" value="#f0fdf4">
+            </label>
+        </div>
+        <div id="cvContainer" class="cv-container rounded-xl">
+            <!-- Creative background shapes -->
+            <div class="creative-shape shape-1"></div>
+            <div class="creative-shape shape-2"></div>
+            
+            <div class="flex flex-col md:flex-row">
+                <!-- Left Sidebar -->
+                <div class="w-full md:w-1/3 bg-gradient-to-b from-primary to-secondary p-8 text-white relative overflow-hidden" id="sidebar-block">
+                    <div class="block-controls no-print">
+                        <button onclick="moveBlock('sidebar-block', 'down')" title="Descendre le bloc">▼</button>
+                        <button onclick="moveBlock('sidebar-block', 'up')" title="Monter le bloc">▲</button>
+                        <button onclick="removeBlock('sidebar-block')" title="Supprimer le bloc">✕</button>
+                    </div>
+                    <div class="relative z-10">
+                        <!-- Profile Image -->
+                        <div class="flex justify-center mb-6">
+                            <div class="relative">
+                                <img id="profileImage" src="https://via.placeholder.com/150" alt="Profile" class="profile-image">
+                                <label for="imageUpload" class="absolute bottom-0 right-0 bg-white text-primary rounded-full p-2 cursor-pointer shadow-md">
+                                    <i class="fas fa-camera"></i>
+                                    <input type="file" id="imageUpload" accept="image/*" class="hidden">
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Personal Info -->
+                        <div class="text-center mb-8">
+                            <h2 id="name" class="text-2xl font-bold mb-1 editable-block" tabindex="0">Jean Dupont <button class="edit-btn no-print" onclick="editField('name')"><i class="fas fa-pen"></i></button></h2>
+                            <p id="title" class="text-lg opacity-90 mb-4 editable-block" tabindex="0">Développeur Full Stack <button class="edit-btn no-print" onclick="editField('title')"><i class="fas fa-pen"></i></button></p>
+                            <div class="flex justify-center space-x-2 mb-4">
+                                <a href="#" class="social-icon editable-block" id="linkedin" tabindex="0"><i class="fab fa-linkedin-in"></i></a>
+                                <a href="#" class="social-icon editable-block" id="github" tabindex="0"><i class="fab fa-github"></i></a>
+                                <a href="#" class="social-icon editable-block" id="twitter" tabindex="0"><i class="fab fa-twitter"></i></a>
+                                <a href="#" class="social-icon editable-block" id="website" tabindex="0"><i class="fas fa-globe"></i></a>
+                            </div>
+                        </div>
+                        
+                        <!-- Contact Info -->
+                        <div class="mb-8">
+                            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                <i class="fas fa-id-card mr-2"></i> Contact
+                            </h3>
+                            <ul class="space-y-3" id="contact-list">
+                                <li class="flex items-center editable-block gap-2" tabindex="0">
+                                    <i class="fas fa-phone mr-3"></i>
+                                    <span class="editable-contact" contenteditable="true">+33 6 12 34 56 78</span>
+                                    <button class="edit-btn no-print" onclick="removeContact(this)">✕</button>
+                                </li>
+                                <li class="flex items-center editable-block gap-2" tabindex="0">
+                                    <i class="fas fa-envelope mr-3"></i>
+                                    <span class="editable-contact" contenteditable="true">jean.dupont@email.com</span>
+                                    <button class="edit-btn no-print" onclick="removeContact(this)">✕</button>
+                                </li>
+                                <li class="flex items-center editable-block gap-2" tabindex="0">
+                                    <i class="fas fa-map-marker-alt mr-3"></i>
+                                    <span class="editable-contact" contenteditable="true">Paris, France</span>
+                                    <button class="edit-btn no-print" onclick="removeContact(this)">✕</button>
+                                </li>
+                            </ul>
+                            <button class="edit-btn no-print mt-2" onclick="addContact()">+ Ajouter un contact</button>
+                        </div>
+                        
+                        <!-- Skills -->
+                        <div class="mb-8">
+                            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                <i class="fas fa-code mr-2"></i> Compétences
+                            </h3>
+                            <div class="space-y-4" id="skills-list">
+                                <div class="skill-item editable-block flex items-center gap-2" tabindex="0">
+                                    <span class="skill-label editable-skill" contenteditable="true">JavaScript</span>
+                                    <span class="skill-value editable-skill" contenteditable="true">85%</span>
+                                    <button class="edit-btn no-print" onclick="removeSkill(this)">✕</button>
+                                    <div class="skill-bar flex-1 ml-2" onclick="editSkillBar(this)">
+                                        <div class="skill-progress animated" style="width: 85%"><div class="progress-handle"></div></div>
+                                    </div>
+                                </div>
+                                <div class="skill-item editable-block flex items-center gap-2" tabindex="0">
+                                    <span class="skill-label editable-skill" contenteditable="true">React</span>
+                                    <span class="skill-value editable-skill" contenteditable="true">75%</span>
+                                    <button class="edit-btn no-print" onclick="removeSkill(this)">✕</button>
+                                    <div class="skill-bar flex-1 ml-2" onclick="editSkillBar(this)">
+                                        <div class="skill-progress animated" style="width: 75%"><div class="progress-handle"></div></div>
+                                    </div>
+                                </div>
+                                <div class="skill-item editable-block flex items-center gap-2" tabindex="0">
+                                    <span class="skill-label editable-skill" contenteditable="true">Node.js</span>
+                                    <span class="skill-value editable-skill" contenteditable="true">80%</span>
+                                    <button class="edit-btn no-print" onclick="removeSkill(this)">✕</button>
+                                    <div class="skill-bar flex-1 ml-2" onclick="editSkillBar(this)">
+                                        <div class="skill-progress animated" style="width: 80%"><div class="progress-handle"></div></div>
+                                    </div>
+                                </div>
+                                <div class="skill-item editable-block flex items-center gap-2" tabindex="0">
+                                    <span class="skill-label editable-skill" contenteditable="true">CSS/Tailwind</span>
+                                    <span class="skill-value editable-skill" contenteditable="true">90%</span>
+                                    <button class="edit-btn no-print" onclick="removeSkill(this)">✕</button>
+                                    <div class="skill-bar flex-1 ml-2" onclick="editSkillBar(this)">
+                                        <div class="skill-progress animated" style="width: 90%"><div class="progress-handle"></div></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="edit-btn no-print mt-2" onclick="addSkill()">+ Ajouter une compétence</button>
+                        </div>
+                        
+                        <!-- Languages -->
+                        <div class="mb-8">
+                            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                <i class="fas fa-language mr-2"></i> Langues
+                            </h3>
+                            <div class="space-y-4" id="languages-list">
+                                <div class="skill-item editable-block flex items-center gap-2" tabindex="0">
+                                    <span class="skill-label editable-lang" contenteditable="true">Français</span>
+                                    <span class="skill-value editable-lang" contenteditable="true">100%</span>
+                                    <button class="edit-btn no-print" onclick="removeLang(this)">✕</button>
+                                    <div class="skill-bar flex-1 ml-2" onclick="editSkillBar(this)">
+                                        <div class="skill-progress animated" style="width: 100%"></div>
+                                    </div>
+                                </div>
+                                <div class="skill-item editable-block flex items-center gap-2" tabindex="0">
+                                    <span class="skill-label editable-lang" contenteditable="true">Anglais</span>
+                                    <span class="skill-value editable-lang" contenteditable="true">85%</span>
+                                    <button class="edit-btn no-print" onclick="removeLang(this)">✕</button>
+                                    <div class="skill-bar flex-1 ml-2" onclick="editSkillBar(this)">
+                                        <div class="skill-progress animated" style="width: 85%"></div>
+                                    </div>
+                                </div>
+                                <div class="skill-item editable-block flex items-center gap-2" tabindex="0">
+                                    <span class="skill-label editable-lang" contenteditable="true">Espagnol</span>
+                                    <span class="skill-value editable-lang" contenteditable="true">60%</span>
+                                    <button class="edit-btn no-print" onclick="removeLang(this)">✕</button>
+                                    <div class="skill-bar flex-1 ml-2" onclick="editSkillBar(this)">
+                                        <div class="skill-progress animated" style="width: 60%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="edit-btn no-print mt-2" onclick="addLang()">+ Ajouter une langue</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Right Content -->
+                <div class="w-full md:w-2/3 p-8" id="main-block">
+                    <div class="block-controls no-print">
+                        <button onclick="moveBlock('main-block', 'down')" title="Descendre le bloc">▼</button>
+                        <button onclick="moveBlock('main-block', 'up')" title="Monter le bloc">▲</button>
+                        <button onclick="removeBlock('main-block')" title="Supprimer le bloc">✕</button>
+                    </div>
+                    <!-- About -->
+                    <div class="mb-10 editable-block" id="aboutText" tabindex="0">
+                        <h3 class="text-2xl font-bold mb-4 flex items-center text-primary">
+                            <i class="fas fa-user mr-3"></i> À Propos
+                        </h3>
+                        <p>
+                            Développeur Full Stack passionné avec 5 ans d'expérience dans la création d'applications web modernes et performantes. 
+                            Expertise en JavaScript, React, Node.js et bases de données. Passionné par les nouvelles technologies et toujours 
+                            à la recherche de défis techniques stimulants. Forte capacité à travailler en équipe et à résoudre des problèmes complexes.
+                        </p>
+                        <button class="edit-btn no-print" onclick="editField('aboutText')"><i class="fas fa-pen"></i></button>
+                    </div>
+                    
+                    <!-- Experience -->
+                    <div class="mb-10">
+                        <h3 class="text-2xl font-bold mb-6 flex items-center text-primary">
+                            <i class="fas fa-briefcase mr-3"></i> Expérience Professionnelle
+                        </h3>
+                        <div class="timeline" id="experience-list">
+                            <div class="timeline-item editable-experience" tabindex="0">
+                                <h4 class="text-xl font-semibold">Développeur Full Stack Senior <button class="edit-btn no-print" onclick="editFieldExperience(this)">✎</button></h4>
+                                <div class="text-gray-600 mb-2">Tech Solutions Inc. • 2020 - Présent</div>
+                                <p class="text-gray-700">
+                                    Conception et développement d'une plateforme SaaS avec React et Node.js. 
+                                    Optimisation des performances et mise en place de tests automatisés.
+                                </p>
+                                <div class="mt-2">
+                                    <span class="tag editable-experience" tabindex="0">React</span>
+                                    <span class="tag editable-experience" tabindex="0">Node.js</span>
+                                    <span class="tag editable-experience" tabindex="0">MongoDB</span>
+                                    <span class="tag editable-experience" tabindex="0">AWS</span>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <h4 class="text-xl font-semibold">Développeur Frontend</h4>
+                                <div class="text-gray-600 mb-2">Web Agency • 2018 - 2020</div>
+                                <p class="text-gray-700">
+                                    Développement d'interfaces utilisateur pour divers clients. 
+                                    Collaboration avec les designers pour créer des expériences utilisateur optimales.
+                                </p>
+                                <div class="mt-2">
+                                    <span class="tag">JavaScript</span>
+                                    <span class="tag">Vue.js</span>
+                                    <span class="tag">CSS/SASS</span>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <h4 class="text-xl font-semibold">Développeur Junior</h4>
+                                <div class="text-gray-600 mb-2">Startup XYZ • 2016 - 2018</div>
+                                <p class="text-gray-700">
+                                    Participation au développement d'une application mobile hybride. 
+                                    Maintenance du code existant et implémentation de nouvelles fonctionnalités.
+                                </p>
+                                <div class="mt-2">
+                                    <span class="tag">React Native</span>
+                                    <span class="tag">Firebase</span>
+                                    <span class="tag">API REST</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Education -->
+                    <div class="mb-10">
+                        <h3 class="text-2xl font-bold mb-6 flex items-center text-primary">
+                            <i class="fas fa-graduation-cap mr-3"></i> Formation
+                        </h3>
+                        <div class="timeline" id="education-list">
+                            <div class="timeline-item editable-formation flex flex-col gap-2" tabindex="0">
+                                <h4 class="text-xl font-semibold editable-form" contenteditable="true">Master en Informatique</h4>
+                                <div class="text-gray-600 mb-2 editable-form" contenteditable="true">Université Paris-Saclay • 2014 - 2016</div>
+                                <p class="text-gray-700 editable-form" contenteditable="true">
+                                    Spécialisation en développement web et architectures logicielles. 
+                                    Mémoire sur l'optimisation des performances des applications React.
+                                </p>
+                                <button class="edit-btn no-print" onclick="removeFormation(this)">✕</button>
+                            </div>
+                            <div class="timeline-item">
+                                <h4 class="text-xl font-semibold">Licence en Informatique</h4>
+                                <div class="text-gray-600 mb-2">Université Paris Diderot • 2011 - 2014</div>
+                                <p class="text-gray-700">
+                                    Fondamentaux de la programmation, algorithmique et structures de données.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Projects -->
+                    <div>
+                        <h3 class="text-2xl font-bold mb-6 flex items-center text-primary">
+                            <i class="fas fa-project-diagram mr-3"></i> Projets
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="projects-list">
+                            <div class="bg-gray-50 p-5 rounded-lg border border-gray-200 editable-project flex flex-col gap-2" tabindex="0">
+                                <h4 class="text-lg font-semibold mb-2 editable-proj" contenteditable="true">Plateforme E-learning</h4>
+                                <p class="text-gray-600 mb-3 editable-proj" contenteditable="true">Application complète avec système de cours, quiz et suivi de progression.</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="tag editable-proj" contenteditable="true">MERN Stack</span>
+                                    <span class="tag editable-proj" contenteditable="true">Stripe</span>
+                                    <span class="tag editable-proj" contenteditable="true">JWT</span>
+                                </div>
+                                <button class="edit-btn no-print" onclick="removeProject(this)">✕</button>
+                            </div>
+                            <div class="bg-gray-50 p-5 rounded-lg border border-gray-200">
+                                <h4 class="text-lg font-semibold mb-2">Application de Gestion de Tâches</h4>
+                                <p class="text-gray-600 mb-3">Outil de productivité avec drag & drop, étiquettes et rappels.</p>
+                                <div class="flex flex-wrap">
+                                    <span class="tag">React</span>
+                                    <span class="tag">Firebase</span>
+                                    <span class="tag">Material UI</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // --- Couleurs personnalisées ---
+        document.getElementById('openColorPanel').onclick = function() {
+            document.getElementById('colorPanel').style.display = 'block';
+        };
+        document.getElementById('primaryColorPicker').oninput = function() {
+            document.documentElement.style.setProperty('--primary-color', this.value);
+        };
+        document.getElementById('secondaryColorPicker').oninput = function() {
+            document.documentElement.style.setProperty('--secondary-color', this.value);
+        };
+        document.getElementById('accentColorPicker').oninput = function() {
+            document.documentElement.style.setProperty('--accent-color', this.value);
+        };
+        document.getElementById('lightColorPicker').oninput = function() {
+            document.documentElement.style.setProperty('--light-color', this.value);
+        };
+
+        // --- Edition inline de tous les blocs/infos ---
+        function editField(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            let target = el;
+            if (el.tagName === 'LI' || el.tagName === 'DIV') {
+                // For list items or divs, find the first span or p
+                target = el.querySelector('span, p');
+            }
+            if (!target) return;
+            const old = target.textContent;
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = old;
+            input.className = 'w-full p-1 border border-gray-300 rounded';
+            target.textContent = '';
+            target.appendChild(input);
+            input.focus();
+            input.addEventListener('blur', function() {
+                target.textContent = this.value || old;
+            });
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') input.blur();
+            });
+        }
+        // Pour projets
+        function editFieldProject(btn) {
+            const h4 = btn.parentNode;
+            const old = h4.childNodes[0].textContent.trim();
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = old;
+            input.className = 'w-full p-1 border border-gray-300 rounded';
+            h4.childNodes[0].textContent = '';
+            h4.insertBefore(input, btn);
+            input.focus();
+            input.addEventListener('blur', function() {
+                h4.childNodes[0].textContent = this.value || old;
+                input.remove();
+            });
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') input.blur();
+            });
+        }
+        // Pour formations
+        function editFieldFormation(btn) {
+            const h4 = btn.parentNode;
+            const old = h4.childNodes[0].textContent.trim();
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = old;
+            input.className = 'w-full p-1 border border-gray-300 rounded';
+            h4.childNodes[0].textContent = '';
+            h4.insertBefore(input, btn);
+            input.focus();
+            input.addEventListener('blur', function() {
+                h4.childNodes[0].textContent = this.value || old;
+                input.remove();
+            });
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') input.blur();
+            });
+        }
+        // Pour expériences
+        function editFieldExperience(btn) {
+            const h4 = btn.parentNode;
+            const old = h4.childNodes[0].textContent.trim();
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = old;
+            input.className = 'w-full p-1 border border-gray-300 rounded';
+            h4.childNodes[0].textContent = '';
+            h4.insertBefore(input, btn);
+            input.focus();
+            input.addEventListener('blur', function() {
+                h4.childNodes[0].textContent = this.value || old;
+                input.remove();
+            });
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') input.blur();
+            });
+        }
+        // Edition tags (projets, expériences, formations)
+        document.querySelectorAll('.tag').forEach(tag => {
+            tag.addEventListener('dblclick', function(e) {
+                const old = tag.textContent;
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = old;
+                input.className = 'w-full p-1 border border-gray-300 rounded';
+                tag.textContent = '';
+                tag.appendChild(input);
+                input.focus();
+                input.addEventListener('blur', function() {
+                    tag.textContent = this.value || old;
+                });
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') input.blur();
+                });
+                e.stopPropagation();
+            });
+        });
+
+        // --- Animation des barres de compétences/langues au chargement
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.skill-progress').forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 200);
+            });
+        });
+
+        // --- Edition des barres de compétences/langues
+        function editSkillBar(barDiv) {
+            const skillItem = barDiv.closest('.skill-item');
+            const valueSpan = skillItem.querySelector('.skill-value');
+            let percent = parseInt(valueSpan.textContent);
+            percent = isNaN(percent) ? 0 : percent;
+            let newPercent = prompt("Nouveau pourcentage (0-100) :", percent);
+            if (newPercent === null) return;
+            newPercent = Math.max(0, Math.min(100, parseInt(newPercent)));
+            valueSpan.textContent = newPercent + '%';
+            const progress = barDiv.querySelector('.skill-progress');
+            progress.style.width = newPercent + '%';
+            progress.classList.add('animated');
+        }
+
+        // --- Drag & drop des blocs principaux (sidebar/main) ---
+        function moveBlock(blockId, direction) {
+            const block = document.getElementById(blockId);
+            if (!block) return;
+            const parent = block.parentNode;
+            if (direction === 'up' && block.previousElementSibling) {
+                parent.insertBefore(block, block.previousElementSibling);
+            } else if (direction === 'down' && block.nextElementSibling) {
+                parent.insertBefore(block.nextElementSibling, block);
+            }
+        }
+        function removeBlock(blockId) {
+            const block = document.getElementById(blockId);
+            if (block) block.remove();
+        }
+
+        // --- Image upload ---
+        document.getElementById('imageUpload').addEventListener('change', function(e) {
+            if (e.target.files && e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.getElementById('profileImage').src = event.target.result;
+                };
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+
+        // --- PDF export (identique à l'affichage) ---
+        document.getElementById('downloadBtn').addEventListener('click', function() {
+            document.getElementById('colorPanel').style.display = 'none';
+            const cvContainer = document.getElementById('cvContainer');
+            const opt = {
+                margin: 0,
+                filename: 'mon_cv.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a3', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(cvContainer).save();
+        });
+
+        // --- Ajout/Suppression dynamique pour chaque bloc ---
+        function addSkill() {
+            const tpl = `
+            <div class="skill-item editable-block flex items-center gap-2" tabindex="0">
+                <span class="skill-label editable-skill" contenteditable="true">Nouvelle compétence</span>
+                <span class="skill-value editable-skill" contenteditable="true">80%</span>
+                <button class="edit-btn no-print" onclick="removeSkill(this)">✕</button>
+                <div class="skill-bar flex-1 ml-2" onclick="editSkillBar(this)">
+                    <div class="skill-progress animated" style="width: 80%"><div class="progress-handle"></div></div>
+                </div>
+            </div>`;
+            document.getElementById('skills-list').insertAdjacentHTML('beforeend', tpl);
+        }
+        function removeSkill(btn) {
+            btn.closest('.skill-item').remove();
+        }
+        function addLang() {
+            const tpl = `
+            <div class="skill-item editable-block flex items-center gap-2" tabindex="0">
+                <span class="skill-label editable-lang" contenteditable="true">Nouvelle langue</span>
+                <span class="skill-value editable-lang" contenteditable="true">60%</span>
+                <button class="edit-btn no-print" onclick="removeLang(this)">✕</button>
+                <div class="skill-bar flex-1 ml-2" onclick="editSkillBar(this)">
+                    <div class="skill-progress animated" style="width: 60%"></div>
+                </div>
+            </div>`;
+            document.getElementById('languages-list').insertAdjacentHTML('beforeend', tpl);
+        }
+        function removeLang(btn) {
+            btn.closest('.skill-item').remove();
+        }
+        function addContact() {
+            const tpl = `
+            <li class="flex items-center editable-block gap-2" tabindex="0">
+                <i class="fas fa-info-circle mr-3"></i>
+                <span class="editable-contact" contenteditable="true">Nouvelle info</span>
+                <button class="edit-btn no-print" onclick="removeContact(this)">✕</button>
+            </li>`;
+            document.getElementById('contact-list').insertAdjacentHTML('beforeend', tpl);
+        }
+        function removeContact(btn) {
+            btn.closest('li').remove();
+        }
+        function addProject() {
+            const tpl = `
+            <div class="bg-gray-50 p-5 rounded-lg border border-gray-200 editable-project flex flex-col gap-2" tabindex="0">
+                <h4 class="text-lg font-semibold mb-2 editable-proj" contenteditable="true">Nouveau projet</h4>
+                <p class="text-gray-600 mb-3 editable-proj" contenteditable="true">Description du projet</p>
+                <div class="flex flex-wrap gap-2">
+                    <span class="tag editable-proj" contenteditable="true">Techno</span>
+                </div>
+                <button class="edit-btn no-print" onclick="removeProject(this)">✕</button>
+            </div>`;
+            document.getElementById('projects-list').insertAdjacentHTML('beforeend', tpl);
+        }
+        function removeProject(btn) {
+            btn.closest('.editable-project').remove();
+        }
+        function addFormation() {
+            const tpl = `
+            <div class="timeline-item editable-formation flex flex-col gap-2" tabindex="0">
+                <h4 class="text-xl font-semibold editable-form" contenteditable="true">Nouveau diplôme</h4>
+                <div class="text-gray-600 mb-2 editable-form" contenteditable="true">Établissement • Année</div>
+                <p class="text-gray-700 editable-form" contenteditable="true">Description de la formation</p>
+                <button class="edit-btn no-print" onclick="removeFormation(this)">✕</button>
+            </div>`;
+            document.getElementById('education-list').insertAdjacentHTML('beforeend', tpl);
+        }
+        function removeFormation(btn) {
+            btn.closest('.editable-formation').remove();
+        }
+
+        // --- Barre de progression dynamique pour compétences/langues ---
+        document.addEventListener('input', function(e) {
+            if (e.target.classList.contains('skill-value') || e.target.classList.contains('editable-skill') || e.target.classList.contains('editable-lang')) {
+                let percent = parseInt(e.target.textContent);
+                if (isNaN(percent)) percent = 0;
+                percent = Math.max(0, Math.min(100, percent));
+                const skillItem = e.target.closest('.skill-item');
+                if
