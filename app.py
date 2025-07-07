@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, send_file, jsonify, redirect, url_for, make_response
+from flask import Flask, render_template, request, send_file, jsonify, redirect, url_for, make_response, abort
 from docx import Document
 from io import BytesIO
 import docx.shared
@@ -11,7 +11,7 @@ import sqlite3
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from weasyprint import HTML
-
+from markupsafe import escape
 
 app = Flask(__name__)
 
@@ -30,267 +30,291 @@ def appliquer_style(doc, theme):
 
 @app.route('/')
 def home():
-    return render_template('home.html')
+    try:
+        return render_template('home.html')
+    except Exception as e:
+        return f"Erreur lors du rendu de la page d'accueil : {escape(str(e))}", 500
 
 @app.route('/form')
 def form():
-    return render_template('form.html')
+    try:
+        return render_template('form.html')
+    except Exception as e:
+        return f"Erreur lors du rendu du formulaire : {escape(str(e))}", 500
 
 @app.route('/generate', methods=['POST'])
 def generate_cv():
-    # Vérification du consentement
-    if not request.form.get("consentement"):
-        return "Vous devez accepter la politique de traitement des données.", 400
+    try:
+        # Vérification du consentement
+        if not request.form.get("consentement"):
+            return "Vous devez accepter la politique de traitement des données.", 400
 
-    # Récupération des données
-    theme = request.form.get("theme", "classique")
-    nom = request.form.get("nom", "").strip()
-    age = request.form.get("age", "").strip()
-    titre = request.form.get("titre", "").strip()
-    ville = request.form.get("ville", "").strip()
-    email = request.form.get("email", "").strip()
-    telephone = request.form.get("telephone", "").strip()
-    profil = request.form.get("profil", "").strip()
-    experiences = request.form.get("experiences", "").strip()
-    competences = request.form.get("competences", "").strip()
-    langues = request.form.get("langues", "").strip()
-    formations = request.form.get("formations", "").strip()
-    interets = request.form.get("interets", "").strip()
+        # Récupération des données
+        theme = request.form.get("theme", "classique")
+        nom = request.form.get("nom", "").strip()
+        age = request.form.get("age", "").strip()
+        titre = request.form.get("titre", "").strip()
+        ville = request.form.get("ville", "").strip()
+        email = request.form.get("email", "").strip()
+        telephone = request.form.get("telephone", "").strip()
+        profil = request.form.get("profil", "").strip()
+        experiences = request.form.get("experiences", "").strip()
+        competences = request.form.get("competences", "").strip()
+        langues = request.form.get("langues", "").strip()
+        formations = request.form.get("formations", "").strip()
+        interets = request.form.get("interets", "").strip()
 
 
-    # Validation des champs obligatoires
-    if not nom or not age:
-        return "Les champs 'Nom' et 'Âge' sont obligatoires.", 400
+        # Validation des champs obligatoires
+        if not nom or not age:
+            return "Les champs 'Nom' et 'Âge' sont obligatoires.", 400
 
-    # Sauvegarde dans la base SQLite
-    conn = sqlite3.connect('cv_data.db')
-    c = conn.cursor()
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS cvs (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nom TEXT,
-            age TEXT,
-            titre TEXT,
-            ville TEXT,
-            email TEXT,
-            telephone TEXT,
-            profil TEXT,
-            experiences TEXT,
-            competences TEXT,
-            langues TEXT,
-            formations TEXT,
-            interets TEXT
-        )
-    ''')
-    c.execute('''
-        INSERT INTO cvs (nom, age, titre, ville, email, telephone, profil, experiences, competences, langues, formations, interets)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ''', (nom, age, titre, ville, email, telephone, profil, experiences, competences, langues, formations, interets))
-    conn.commit()
-    conn.close()
-
-    # Récupération de la photo
-    photo = request.files.get("photo")
-    photo_path = None
-    if photo:
+        # Sauvegarde dans la base SQLite
         try:
-            # Sauvegarder temporairement la photo
-            temp_dir = tempfile.gettempdir()
-            photo_filename = secure_filename(photo.filename)
-            photo_path = os.path.join(temp_dir, photo_filename)
-            photo.save(photo_path)
-
-            # Convertir l'image en format compatible (JPEG/PNG)
-            with Image.open(photo_path) as img:
-                if img.format not in ["JPEG", "PNG"]:
-                    photo_path = os.path.join(temp_dir, f"{os.path.splitext(photo_filename)[0]}.png")
-                    img.convert("RGB").save(photo_path, "PNG")
+            conn = sqlite3.connect('cv_data.db')
+            c = conn.cursor()
+            c.execute('''
+                CREATE TABLE IF NOT EXISTS cvs (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    nom TEXT,
+                    age TEXT,
+                    titre TEXT,
+                    ville TEXT,
+                    email TEXT,
+                    telephone TEXT,
+                    profil TEXT,
+                    experiences TEXT,
+                    competences TEXT,
+                    langues TEXT,
+                    formations TEXT,
+                    interets TEXT
+                )
+            ''')
+            c.execute('''
+                INSERT INTO cvs (nom, age, titre, ville, email, telephone, profil, experiences, competences, langues, formations, interets)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (nom, age, titre, ville, email, telephone, profil, experiences, competences, langues, formations, interets))
+            conn.commit()
+            conn.close()
         except Exception as e:
-            return f"Erreur lors du traitement de la photo : {str(e)}", 500
+            return f"Erreur lors de la sauvegarde en base : {escape(str(e))}", 500
 
-    # Création du document
-    doc = Document()
-    appliquer_style(doc, theme)
+        # Récupération de la photo
+        photo = request.files.get("photo")
+        photo_path = None
+        if photo:
+            try:
+                # Sauvegarder temporairement la photo
+                temp_dir = tempfile.gettempdir()
+                photo_filename = secure_filename(photo.filename)
+                photo_path = os.path.join(temp_dir, photo_filename)
+                photo.save(photo_path)
 
-    # Ajouter la photo au document
-    if photo_path:
+                # Convertir l'image en format compatible (JPEG/PNG)
+                with Image.open(photo_path) as img:
+                    if img.format not in ["JPEG", "PNG"]:
+                        photo_path = os.path.join(temp_dir, f"{os.path.splitext(photo_filename)[0]}.png")
+                        img.convert("RGB").save(photo_path, "PNG")
+            except Exception as e:
+                return f"Erreur lors du traitement de la photo : {str(e)}", 500
+
+        # Création du document
         try:
-            doc.add_picture(photo_path, width=docx.shared.Inches(1.5))
+            doc = Document()
+            appliquer_style(doc, theme)
         except Exception as e:
-            return f"Erreur lors de l'ajout de la photo au document : {str(e)}", 500
+            return f"Erreur lors de la création du document : {escape(str(e))}", 500
 
-    # Supprimer la photo temporaire
-    if photo_path:
-        try:
-            os.remove(photo_path)
-        except Exception as e:
-            print(f"Erreur lors de la suppression de la photo temporaire : {str(e)}")
-
-    # En-tête du CV
-    doc.add_heading(f"{nom} - {age} ans", level=0)
-    if titre:
-        doc.add_paragraph(titre)
-    
-    # Coordonnées
-    coordonnees = []
-    if ville: coordonnees.append(f"📍 {ville}")
-    if email: coordonnees.append(f"📧 {email}")
-    if telephone: coordonnees.append(f"📞 {telephone}")
-    
-    if coordonnees:
-        doc.add_paragraph("\n".join(coordonnees))
-
-    # Sections du CV
-    if profil:
-        doc.add_heading("Profil", level=1)
-        doc.add_paragraph(profil)
-
-    if experiences:
-        doc.add_heading("Expériences professionnelles", level=1)
-        for exp in filter(None, (e.strip() for e in experiences.split('\n'))):
-            doc.add_paragraph(exp, style='List Bullet')
-
-    if competences:
-        doc.add_heading("Compétences", level=1)
-        for comp in filter(None, (c.strip() for c in competences.split(','))):
-            doc.add_paragraph(f"• {comp}", style='List Bullet')
-
-    if langues:
-        doc.add_heading("Langues", level=1)
-        for lang in filter(None, (l.strip() for l in langues.split(','))):
-            doc.add_paragraph(f"• {lang}", style='List Bullet')
-
-    if formations:
-        doc.add_heading("Formation", level=1)
-        for form in filter(None, (f.strip() for f in formations.split('\n'))):
-            doc.add_paragraph(f"• {form}", style='List Bullet')
-
-    if interets:
-        doc.add_heading("Centres d'intérêt", level=1)
-        for interest in filter(None, (i.strip() for i in interets.split(','))):
-            doc.add_paragraph(f"• {interest}", style='List Bullet')
-
-    format = request.form.get("format", "docx")  # Default format is docx
-
-    if format == "pdf":
-        # Generate PDF
-        buffer = BytesIO()
-        pdf = canvas.Canvas(buffer, pagesize=letter)
-        pdf.setFont("Helvetica", 12)
-
-        # Header with photo
+        # Ajouter la photo au document
         if photo_path:
             try:
-                pdf.drawImage(photo_path, 50, 700, width=100, height=100)  # Add photo at the top-left
+                doc.add_picture(photo_path, width=docx.shared.Inches(1.5))
             except Exception as e:
-                print(f"Erreur lors de l'ajout de la photo au PDF : {e}")
+                return f"Erreur lors de l'ajout de la photo au document : {str(e)}", 500
 
-        pdf.setFont("Helvetica-Bold", 16)
-        pdf.drawString(160, 750, f"{nom} - {age} ans")
-        if titre:
-            pdf.setFont("Helvetica", 14)
-            pdf.drawString(160, 730, titre)
-
-        # Contact Information
-        y = 710
-        pdf.setFont("Helvetica-Bold", 12)
-        pdf.drawString(160, y, "Coordonnées :")
-        y -= 20
-        pdf.setFont("Helvetica", 12)
-        if ville:
-            pdf.drawString(160, y, f"📍 {ville}")
-            y -= 20
-        if email:
-            pdf.drawString(160, y, f"📧 {email}")
-            y -= 20
-        if telephone:
-            pdf.drawString(160, y, f"📞 {telephone}")
-            y -= 20
-
-        # Sections with styled layout
-        def add_section(title, content, y):
-            if content:
-                pdf.setFont("Helvetica-Bold", 14)
-                pdf.drawString(50, y, title)
-                y -= 20
-                pdf.setFont("Helvetica", 12)
-                for line in content.split('\n'):
-                    pdf.drawString(50, y, line.strip())
-                    y -= 20
-            return y
-
-        y = add_section("Profil", profil, y - 40)
-        y = add_section("Expériences professionnelles", experiences, y - 40)
-        y = add_section("Compétences", competences.replace(',', '\n'), y - 40)
-        y = add_section("Langues", langues.replace(',', '\n'), y - 40)
-        y = add_section("Formation", formations, y - 40)
-        y = add_section("Centres d'intérêt", interets.replace(',', '\n'), y - 40)
-
-        pdf.save()
-        buffer.seek(0)
-
-        # Remove temporary photo
+        # Supprimer la photo temporaire
         if photo_path:
             try:
                 os.remove(photo_path)
             except Exception as e:
-                print(f"Erreur lors de la suppression de la photo temporaire : {e}")
+                print(f"Erreur lors de la suppression de la photo temporaire : {str(e)}")
+
+        # En-tête du CV
+        doc.add_heading(f"{nom} - {age} ans", level=0)
+        if titre:
+            doc.add_paragraph(titre)
+        
+        # Coordonnées
+        coordonnees = []
+        if ville: coordonnees.append(f"📍 {ville}")
+        if email: coordonnees.append(f"📧 {email}")
+        if telephone: coordonnees.append(f"📞 {telephone}")
+        
+        if coordonnees:
+            doc.add_paragraph("\n".join(coordonnees))
+
+        # Sections du CV
+        if profil:
+            doc.add_heading("Profil", level=1)
+            doc.add_paragraph(profil)
+
+        if experiences:
+            doc.add_heading("Expériences professionnelles", level=1)
+            for exp in filter(None, (e.strip() for e in experiences.split('\n'))):
+                doc.add_paragraph(exp, style='List Bullet')
+
+        if competences:
+            doc.add_heading("Compétences", level=1)
+            for comp in filter(None, (c.strip() for c in competences.split(','))):
+                doc.add_paragraph(f"• {comp}", style='List Bullet')
+
+        if langues:
+            doc.add_heading("Langues", level=1)
+            for lang in filter(None, (l.strip() for l in langues.split(','))):
+                doc.add_paragraph(f"• {lang}", style='List Bullet')
+
+        if formations:
+            doc.add_heading("Formation", level=1)
+            for form in filter(None, (f.strip() for f in formations.split('\n'))):
+                doc.add_paragraph(f"• {form}", style='List Bullet')
+
+        if interets:
+            doc.add_heading("Centres d'intérêt", level=1)
+            for interest in filter(None, (i.strip() for i in interets.split(','))):
+                doc.add_paragraph(f"• {interest}", style='List Bullet')
+
+        format = request.form.get("format", "docx")  # Default format is docx
+
+        if format == "pdf":
+            # Generate PDF
+            buffer = BytesIO()
+            pdf = canvas.Canvas(buffer, pagesize=letter)
+            pdf.setFont("Helvetica", 12)
+
+            # Header with photo
+            if photo_path:
+                try:
+                    pdf.drawImage(photo_path, 50, 700, width=100, height=100)  # Add photo at the top-left
+                except Exception as e:
+                    print(f"Erreur lors de l'ajout de la photo au PDF : {e}")
+
+            pdf.setFont("Helvetica-Bold", 16)
+            pdf.drawString(160, 750, f"{nom} - {age} ans")
+            if titre:
+                pdf.setFont("Helvetica", 14)
+                pdf.drawString(160, 730, titre)
+
+            # Contact Information
+            y = 710
+            pdf.setFont("Helvetica-Bold", 12)
+            pdf.drawString(160, y, "Coordonnées :")
+            y -= 20
+            pdf.setFont("Helvetica", 12)
+            if ville:
+                pdf.drawString(160, y, f"📍 {ville}")
+                y -= 20
+            if email:
+                pdf.drawString(160, y, f"📧 {email}")
+                y -= 20
+            if telephone:
+                pdf.drawString(160, y, f"📞 {telephone}")
+                y -= 20
+
+            # Sections with styled layout
+            def add_section(title, content, y):
+                if content:
+                    pdf.setFont("Helvetica-Bold", 14)
+                    pdf.drawString(50, y, title)
+                    y -= 20
+                    pdf.setFont("Helvetica", 12)
+                    for line in content.split('\n'):
+                        pdf.drawString(50, y, line.strip())
+                        y -= 20
+                return y
+
+            y = add_section("Profil", profil, y - 40)
+            y = add_section("Expériences professionnelles", experiences, y - 40)
+            y = add_section("Compétences", competences.replace(',', '\n'), y - 40)
+            y = add_section("Langues", langues.replace(',', '\n'), y - 40)
+            y = add_section("Formation", formations, y - 40)
+            y = add_section("Centres d'intérêt", interets.replace(',', '\n'), y - 40)
+
+            pdf.save()
+            buffer.seek(0)
+
+            # Remove temporary photo
+            if photo_path:
+                try:
+                    os.remove(photo_path)
+                except Exception as e:
+                    print(f"Erreur lors de la suppression de la photo temporaire : {e}")
+
+            return send_file(
+                buffer,
+                as_attachment=True,
+                download_name=f"CV_{nom.replace(' ', '_')}.pdf",
+                mimetype='application/pdf'
+            )
+
+        # Génération du fichier
+        try:
+            buffer = BytesIO()
+            doc.save(buffer)
+            buffer.seek(0)
+        except Exception as e:
+            return f"Erreur lors de la sauvegarde du fichier : {escape(str(e))}", 500
 
         return send_file(
             buffer,
             as_attachment=True,
-            download_name=f"CV_{nom.replace(' ', '_')}.pdf",
-            mimetype='application/pdf'
+            download_name=f"CV_{nom.replace(' ', '_')}.docx",
+            mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
         )
-
-    # Génération du fichier
-    buffer = BytesIO()
-    doc.save(buffer)
-    buffer.seek(0)
-
-    return send_file(
-        buffer,
-        as_attachment=True,
-        download_name=f"CV_{nom.replace(' ', '_')}.docx",
-        mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-    )
+    except Exception as e:
+        return f"Erreur inattendue : {escape(str(e))}", 500
 
 @app.route('/cvs')
 def liste_cvs():
-    conn = sqlite3.connect('cv_data.db')
-    conn.row_factory = sqlite3.Row
-    c = conn.cursor()
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS cvs (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nom TEXT,
-            age TEXT,
-            titre TEXT,
-            ville TEXT,
-            email TEXT,
-            telephone TEXT,
-            profil TEXT,
-            experiences TEXT,
-            competences TEXT,
-            langues TEXT,
-            formations TEXT,
-            interets TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    ''')
-    c.execute("SELECT * FROM cvs ORDER BY created_at DESC")
-    rows = c.fetchall()
-    conn.close()
-    return render_template("liste_cvs.html", cvs=rows)
+    try:
+        conn = sqlite3.connect('cv_data.db')
+        conn.row_factory = sqlite3.Row
+        c = conn.cursor()
+        c.execute('''
+            CREATE TABLE IF NOT EXISTS cvs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nom TEXT,
+                age TEXT,
+                titre TEXT,
+                ville TEXT,
+                email TEXT,
+                telephone TEXT,
+                profil TEXT,
+                experiences TEXT,
+                competences TEXT,
+                langues TEXT,
+                formations TEXT,
+                interets TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        c.execute("SELECT * FROM cvs ORDER BY created_at DESC")
+        rows = c.fetchall()
+        conn.close()
+        return render_template("liste_cvs.html", cvs=rows)
+    except Exception as e:
+        return f"Erreur lors de la récupération des CVs : {escape(str(e))}", 500
 
 @app.route('/delete/<int:id>', methods=['POST'])
 def delete_cv(id):
-    conn = sqlite3.connect("cv_data.db")
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM cvs WHERE id = ?", (id,))
-    conn.commit()
-    conn.close()
-    return redirect(url_for('admin'))
+    try:
+        conn = sqlite3.connect("cv_data.db")
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM cvs WHERE id = ?", (id,))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('admin'))
+    except Exception as e:
+        return f"Erreur lors de la suppression du CV : {escape(str(e))}", 500
 
 @app.route('/save_motivation', methods=['POST'])
 def save_motivation():
@@ -499,27 +523,31 @@ def generate_cv_fayssal_structure(doc, data):
 
 @app.route('/download/<int:id>', methods=['GET'])
 def download_cv(id):
-    conn = sqlite3.connect("cv_data.db")
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM cvs WHERE id = ?", (id,))
-    row = cursor.fetchone()
-    conn.close()
+    try:
+        conn = sqlite3.connect("cv_data.db")
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM cvs WHERE id = ?", (id,))
+        row = cursor.fetchone()
+        conn.close()
+        if not row:
+            abort(404, "CV introuvable.")
 
-    # Generate the updated CV document
-    doc = Document()
-    generate_cv_fayssal_structure(doc, row)
+        doc = Document()
+        generate_cv_fayssal_structure(doc, row)
 
-    buffer = BytesIO()
-    doc.save(buffer)
-    buffer.seek(0)
+        buffer = BytesIO()
+        doc.save(buffer)
+        buffer.seek(0)
 
-    return send_file(
-        buffer,
-        as_attachment=True,
-        download_name=f"CV_{row['nom'].replace(' ', '_')}.docx",
-        mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-    )
+        return send_file(
+            buffer,
+            as_attachment=True,
+            download_name=f"CV_{row['nom'].replace(' ', '_')}.docx",
+            mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        )
+    except Exception as e:
+        return f"Erreur lors du téléchargement du CV : {escape(str(e))}", 500
 
 @app.route('/edit_lm/<int:id>', methods=['GET', 'POST'])
 def edit_lm(id):
@@ -656,37 +684,46 @@ def delete_all_lettres():
 
 @app.route('/download_modern/<int:id>', methods=['GET'])
 def download_modern_cv(id):
-    conn = sqlite3.connect("cv_data.db")
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM cvs WHERE id = ?", (id,))
-    row = cursor.fetchone()
-    conn.close()
-    if not row:
-        return "CV introuvable.", 404
+    try:
+        conn = sqlite3.connect("cv_data.db")
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM cvs WHERE id = ?", (id,))
+        row = cursor.fetchone()
+        conn.close()
+        if not row:
+            abort(404, "CV introuvable.")
 
-    # Rendu du template HTML moderne avec Jinja2
-    rendered = render_template("cv_modern.html", cv=row)
+        rendered = render_template("cv_modern.html", cv=row)
+        pdf = HTML(string=rendered, base_url=request.base_url).write_pdf()
 
-    # Génération du PDF avec WeasyPrint
-    pdf = HTML(string=rendered, base_url=request.base_url).write_pdf()
-
-    response = make_response(pdf)
-    response.headers['Content-Type'] = 'application/pdf'
-    response.headers['Content-Disposition'] = f'attachment; filename=CV_{row["nom"].replace(" ", "_")}_modern.pdf'
-    return response
+        response = make_response(pdf)
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = f'attachment; filename=CV_{row['nom'].replace(' ', '_')}_modern.pdf'
+        return response
+    except Exception as e:
+        return f"Erreur lors du téléchargement du CV moderne : {escape(str(e))}", 500
 
 @app.route('/cv_modern_generator')
 def cv_modern_generator():
-    return render_template('cv_modern_generator.html')
+    try:
+        return render_template('cv_modern_generator.html')
+    except Exception as e:
+        return f"Erreur lors du rendu du générateur CV moderne : {escape(str(e))}", 500
 
 @app.route('/cv_classic_editable')
 def cv_classic_editable():
-    return render_template('cv_classic_editable.html')
+    try:
+        return render_template('cv_classic_editable.html')
+    except Exception as e:
+        return f"Erreur lors du rendu du générateur CV classique : {escape(str(e))}", 500
 
 @app.route('/cv_creatif_generator')
 def cv_creatif_generator():
-    return render_template('cv_creatif_generator.html')
+    try:
+        return render_template('cv_creatif_generator.html')
+    except Exception as e:
+        return f"Erreur lors du rendu du générateur CV créatif : {escape(str(e))}", 500
 
 if __name__ == '__main__':
     # Conseils pour le lancement :

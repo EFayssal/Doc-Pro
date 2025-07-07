@@ -1,11 +1,11 @@
-# Doc PRO (Free)
+# Doc PRO 5.6 Version stable (Free)
 
-cv_app est une application web qui permet de créer, gérer et personnaliser des CV et des lettres de motivation facilement.
+Doc Pro 5.6 est une application web qui permet de créer, gérer et personnaliser des CV et des lettres de motivation facilement.
 
 ## Nouveautés
-- **C👉 CV Moderne 100% personnalisable – changez les couleurs, déplacez les blocs, modifiez chaque texte à votre guise, puis téléchargez-le en PDF format A4, prêt à impressionner et convaincre votre futur employeur** 
+- **👉 CV Moderne 100% personnalisable / changez les couleurs, déplacez les blocs, modifiez chaque texte à votre guise, puis téléchargez-le en PDF format A4, prêt à impressionner et convaincre votre futur employeur** 
 
-- **👉 CV Classique optimisé ATS – spécialement conçu pour passer les robots de tri (ATS) sans être rejeté. Toujours mis à jour selon les dernières exigences, testé et approuvé pour que votre CV arrive directement chez l’employeur.Vous pouvez changer la police et les couleurs, personnaliser chaque détail, puis le télécharger en PDF format A4** 
+- **👉 CV Classique optimisé ATS / spécialement conçu pour passer les robots de tri (ATS) sans être rejeté. Toujours mis à jour selon les dernières exigences, testé et approuvé pour que votre CV arrive directement chez l’employeur.Vous pouvez changer la police et les couleurs, personnaliser chaque détail, puis le télécharger en PDF format A4** 
 
 - **Maj des interfaces utilisateurs L'integration du JS Le Cv_Moderne est entièrement personalisable , infos, Couleurs, position, barre de compétences réglable**
 - **Génération d’une lettre de motivation** 
@@ -69,11 +69,14 @@ Cette application a pour objectif de vous aider à concevoir un ou plusieurs CV 
 # Image
 
 Voici une image illustrative :
-CV Moderne 
+CV Moderne :
 ![Image](https://github.com/user-attachments/assets/d363a247-ba8c-4b82-9323-2dbed8454d62)
-CV Classique 
+CV Classique !
 ![Image](https://github.com/user-attachments/assets/6de7c746-b32a-4eea-b5ae-e6b141537fa5)
-Home (Focus sur Cv classique)
-![Image2](https://github.com/user-attachments/assets/162bf825-5693-4dda-9f49-c92318fe742f)
+CV Créatif :
+![Image](https://github.com/user-attachments/assets/bb8eae18-2ca5-41e6-bde3-1d26b8f0e02f)
 
-Merci d’utiliser Doc Pro 
+Home (Focus sur le Cv créatif)
+![Image2](https://github.com/user-attachments/assets/414d1092-ec83-4119-9f03-63e9d8aa7d19)
+
+Merci d’utiliser Doc Pro 5.6

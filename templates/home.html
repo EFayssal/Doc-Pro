@@ -7,15 +7,13 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body {
+        html, body {
+            min-height: 100vh;
             background: 
                 radial-gradient(circle at 2% 10%, rgba(20, 25, 35, 0.9) 100%, rgba(15, 15, 25, 1) 50%),
                 url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path fill="rgba(255,255,255,0.03)" d="M50 0L0 50L50 100L100 50L50 0ZM20 50L50 20L80 50L50 80L20 50Z"/><path fill="none" stroke="rgba(255,255,255,0.02)" stroke-width="0.5" d="M50 0L0 50L50 100L100 50L50 0ZM20 50L50 20L80 50L50 80L20 50Z"/><circle cx="50" cy="50" r="10" fill="rgba(255,255,255,0.02)"/></svg>');
             background-size: 100px 100px;
-            min-height: 100vh;
-            overflow-x: hidden;
         }
-
         .bubble {
             position: absolute;
             border-radius: 50%;
@@ -25,152 +23,156 @@
             transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             z-index: 0;
         }
-
-        .model-bubble {
-            position: absolute;
-            width: 180px;
-            height: 220px;
-            border-radius: 12px;
-            display: flex;
-            overflow: hidden;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.4s ease;
-            transform: scale(0);
-            opacity: 0;
-            z-index: 10;
+        @keyframes bounce-slow {
+            0%, 100% { transform: translateY(0);}
+            50% { transform: translateY(-10px);}
         }
-
-        .model-bubble:hover {
-            transform: scale(1.05) !important;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        .animate-bounce-slow {
+            animation: bounce-slow 2.2s infinite;
         }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-            transition: all 0.3s ease;
+        /* Responsive grid for models */
+        .cv-models-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2.5rem;
         }
-
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.6);
-        }
-
-        .btn-secondary {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
-            transition: all 0.3s ease;
-        }
-
-        .btn-secondary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(79, 172, 254, 0.6);
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
-        .floating {
-            animation: float 6s ease-in-out infinite;
-        }
-
-        .cv-card-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 60vh;
-        }
-
-        .cv-card-animated {
-            transform: translateY(100vh) scale(0.8) rotateY(30deg);
-            opacity: 0;
-            animation: cardEnter 1.2s cubic-bezier(.68,-0.55,.27,1.55) forwards;
-        }
-
-        @keyframes cardEnter {
-            to {
-                transform: translateY(0) scale(1) rotateY(0);
-                opacity: 1;
+        @media (min-width: 700px) {
+            .cv-models-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
-
-        .cv-image {
-            width: 350px;
-            height: auto;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.18);
-            border-radius: 18px;
-            background: #fff;
+        @media (min-width: 1024px) {
+            .cv-models-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        .cv-model-block {
+            min-height: 340px;
+            border-radius: 2rem;
+            padding: 2.5rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            position: relative;
+            background: linear-gradient(135deg, #232946 60%, #232946 100%);
+        }
+        .cv-model-block:hover {
+            transform: scale(1.04);
+            box-shadow: 0 16px 48px #00ffae33, 0 2px 12px #0008;
+        }
+        .cv-model-block img {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .cv-model-block .group-hover\:scale-125:hover {
+            transform: scale(1.25);
+            z-index: 20;
+            box-shadow: 0 0 32px #00ffae99;
+        }
+        .cv-model-block .preview-hover {
+            transition: opacity 0.3s;
+        }
+        @media (max-width: 700px) {
+            .cv-model-block {
+                padding: 1.2rem;
+                min-height: 220px;
+            }
         }
     </style>
 </head>
-<body class="text-gray-200 font-sans flex flex-col items-center justify-center p-4 relative overflow-hidden" style="min-height:100vh;">
-    <!-- Background bubbles -->
-    <div id="bubbles-container"></div>
-
-    <!-- Main content -->
-    <div class="max-w-3xl w-full relative z-10 text-center" style="margin-top: 60px;">
-        <h1 class="text-5xl md:text-6xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-500 drop-shadow-lg" style="letter-spacing:0.01em;">
-            Créez Votre Prochain Document Professionnel
-        </h1>
-        
-        <p class="text-xl md:text-2xl mb-12 opacity-90 max-w-2xl mx-auto" style="color:#e0e6f7;">
-            Des outils puissants pour façonner votre avenir professionnel avec élégance et simplicité.<br>
-            <span style="color:#00ffae;font-weight:600;">CV modernes, lettres de motivation, tout est à portée de clic.</span>
-        </p>
-        
-        <div class="flex flex-col md:flex-row justify-center gap-6 mb-20">
-            <a href="/form" class="btn-primary py-4 px-8 rounded-full text-lg font-semibold flex items-center justify-center gap-2 shadow-lg hover:scale-105 transition-all duration-200" style="background:linear-gradient(135deg,#00ffae 0%,#667eea 100%);color:#232946;">
-                <i class="fas fa-envelope-open-text"></i>
-                Lettre de Motivation
-            </a>
-            <button id="cv-create-btn" class="btn-secondary py-4 px-8 rounded-full text-lg font-semibold flex items-center justify-center gap-2 shadow-lg hover:scale-105 transition-all duration-200" style="background:linear-gradient(135deg,#764ba2 0%,#4facfe 100%);color:#fff;">
-                <i class="fas fa-file-alt"></i>
-                Choisir un modèl pour créer un CV 
-        </div>
-
-        <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
-            <!-- Moderne -->
-            <div class="rounded-2xl bg-gradient-to-br from-purple-700/80 to-indigo-900/80 p-8 shadow-xl hover:scale-105 transition-all duration-200 cursor-pointer cv-model-block group" data-model="fayssal" style="position:relative;">
-                <img src="/static/cv_modern_sample.png" alt="Modèle Moderne" class="w-full rounded-lg mb-4 shadow-md modern-preview-img transition-all duration-300 group-hover:scale-125 group-hover:z-20 group-hover:shadow-2xl" style="height:180px;object-fit:cover;">
-                <h3 class="text-xl font-bold mb-2 text-white">Moderne</h3>
-                <p class="text-gray-200">Design professionnel, couleurs modernes, parfait pour tous secteurs.</p>
-                <!-- Image preview agrandie sur hover -->
-                <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" style="background:rgba(30,30,40,0.93);border-radius:16px;">
-                    <img src="/static/cv_modern_sample.png" alt="Aperçu Modèle Moderne" style="max-width:98%;max-height:98%;border-radius:12px;box-shadow:0 0 32px #764ba299;transform:scale(1.25);transition:transform 0.3s;">
+<body class="text-gray-200 font-sans flex flex-col items-center justify-center p-0 relative overflow-x-hidden bg-transparent" style="min-height:100vh;">
+    <!-- Doc Pro Premium Button (discret et compact) -->
+    <div id="docpro-btn-container" class="w-full flex justify-center fixed top-0 left-0 z-50" style="pointer-events: none;">
+        <div class="relative mt-3">
+            <button id="docpro-btn"
+                class="px-4 py-1.5 rounded-full font-bold text-base shadow border border-yellow-300 bg-gradient-to-r from-yellow-200 via-yellow-300 to-yellow-400 text-yellow-900 tracking-widest transition-all duration-200 outline-none ring-1 ring-yellow-100 hover:scale-105 hover:shadow-lg"
+                style="pointer-events:auto;letter-spacing:0.08em;box-shadow:0 2px 8px #ffe06655,0 1px 4px #0001;min-width:90px;">
+                <i class="fas fa-crown mr-1 text-yellow-600 text-sm"></i>Doc Pro
+            </button>
+            <!-- Contact panel (hidden by default) -->
+            <div id="docpro-contact-panel"
+                class="absolute left-1/2 -translate-x-1/2 mt-2 min-w-[220px] bg-gradient-to-br from-yellow-50 via-white to-yellow-100 border border-yellow-200 rounded-xl shadow-xl px-4 py-3 text-gray-800 text-sm font-semibold opacity-0 pointer-events-none transition-all duration-300"
+                style="top:100%;z-index:100;">
+                <div class="flex flex-col items-center gap-1.5">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-envelope text-yellow-500"></i>
+                        <span class="hover:text-yellow-700 transition-colors duration-150 select-all">fayssalelhouaripro@gmail.com</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-phone text-yellow-500"></i>
+                        <span class="hover:text-yellow-700 transition-colors duration-150 select-all">07 59 44 83 18</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fab fa-linkedin text-yellow-500"></i>
+                        <a href="https://www.linkedin.com/in/fayssalelhouari/" target="_blank" class="hover:text-yellow-700 underline transition-colors duration-150">LinkedIn</a>
+                    </div>
                 </div>
             </div>
-            <!-- Classique -->
-            <div class="rounded-2xl bg-gradient-to-br from-blue-700/80 to-cyan-900/80 p-8 shadow-xl hover:scale-105 transition-all duration-200 cursor-pointer cv-model-block group" data-model="classique" style="position:relative;">
-                <img src="/static/cv_classic_sample.jpg" alt="Modèle Classique" class="w-full rounded-lg mb-4 shadow-md transition-all duration-300 group-hover:scale-125 group-hover:z-20 group-hover:shadow-2xl" style="height:180px;object-fit:cover;">
-                <h3 class="text-xl font-bold mb-2 text-white">Classique</h3>
-                <p class="text-gray-200">Sobre, efficace, idéal pour les candidatures traditionnelles.</p>
-                <!-- Image preview agrandie sur hover -->
-                <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" style="background:rgba(30,30,40,0.93);border-radius:16px;">
-                    <img src="/static/cv_classic_sample.jpg" alt="Aperçu Modèle Classique" style="max-width:98%;max-height:98%;border-radius:12px;box-shadow:0 0 32px #667eea99;transform:scale(1.25);transition:transform 0.3s;">
-                </div>
-            </div>
-            <!-- Créatif -->
-            <div class="rounded-2xl bg-gradient-to-br from-green-700/80 to-emerald-900/80 p-8 shadow-xl hover:scale-105 transition-all duration-200 cursor-pointer cv-model-block" data-model="etudiant">
-                <img src="/static/cv_creatif_sample.png" alt="Modèle Créatif" class="w-full rounded-lg mb-4 shadow-md" style="height:180px;object-fit:cover;">
-                <h3 class="text-xl font-bold mb-2 text-white">Créatif</h3>
-                <p class="text-gray-200">Visuel, coloré, parfait pour les profils artistiques ou étudiants.</p>
-            </div>
-        </div>
-
-        <div class="mt-8 text-center">
-            <span class="inline-block bg-gradient-to-r from-[#00ffae] to-[#667eea] text-white px-6 py-2 rounded-full font-semibold shadow-md text-lg tracking-wide">
-                100% Gratuit & Sans inscription
-            </span>
         </div>
     </div>
 
+    <!-- Main content -->
+    <main class="w-full flex flex-col items-center justify-center px-2" style="margin-top: 80px;">
+        <div class="max-w-6xl w-full mx-auto relative z-10 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-7 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-500 drop-shadow-lg" style="letter-spacing:0.01em;">
+                Créez Votre Prochain Document Professionnel
+            </h1>
+            <p class="text-lg md:text-2xl mb-8 opacity-90 max-w-2xl mx-auto" style="color:#e0e6f7;">
+                Des outils puissants pour façonner votre avenir professionnel avec élégance et simplicité.<br>
+                <span style="color:#00ffae;font-weight:600;">CV modernes, lettres de motivation, tout est à portée de clic.</span>
+            </p>
+            <div class="flex flex-col md:flex-row justify-center gap-6 mb-6">
+                <a href="/form" class="btn-primary py-4 px-8 rounded-full text-lg font-semibold flex items-center justify-center gap-2 shadow-lg hover:scale-105 transition-all duration-200" style="background:linear-gradient(135deg,#00ffae 0%,#667eea 100%);color:#232946;">
+                    <i class="fas fa-envelope-open-text"></i>
+                    Lettre de Motivation
+                </a>
+            </div>
+            <div class="mb-2">
+                <button class="py-4 px-10 rounded-full text-xl font-bold bg-gradient-to-r from-[#00ffae] to-[#667eea] text-white shadow-lg hover:scale-105 transition-all duration-200 tracking-wide animate-bounce-slow" style="margin-bottom:8px;">
+                    Choisissez un modèle de CV pour commencer <span class="ml-2">👇</span>
+                </button>
+                <div class="text-base mt-1 text-[#00ffae] font-semibold">100% Gratuit & Sans inscription</div>
+            </div>
+            <div class="mt-4 cv-models-grid">
+                <!-- Moderne -->
+                <div class="cv-model-block bg-gradient-to-br from-purple-700/80 to-indigo-900/80 group" data-model="fayssal">
+                    <img src="/static/cv_modern_sample.png" alt="Modèle Moderne" class="w-full rounded-xl mb-6 shadow-md transition-all duration-300 group-hover:scale-125 group-hover:z-20 group-hover:shadow-2xl" style="height:220px;object-fit:cover;">
+                    <h3 class="text-2xl font-bold mb-2 text-white">Moderne</h3>
+                    <p class="text-gray-200 mb-2">Design professionnel, couleurs modernes, parfait pour tous secteurs.</p>
+                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 preview-hover" style="background:rgba(30,30,40,0.93);border-radius:2rem;">
+                        <img src="/static/cv_modern_sample.png" alt="Aperçu Modèle Moderne" style="max-width:98%;max-height:98%;border-radius:18px;box-shadow:0 0 32px #764ba299;transform:scale(1.25);transition:transform 0.3s;">
+                    </div>
+                </div>
+                <!-- Classique -->
+                <div class="cv-model-block bg-gradient-to-br from-blue-700/80 to-cyan-900/80 group" data-model="classique">
+                    <img src="/static/cv_classic_sample.jpg" alt="Modèle Classique" class="w-full rounded-xl mb-6 shadow-md transition-all duration-300 group-hover:scale-125 group-hover:z-20 group-hover:shadow-2xl" style="height:220px;object-fit:cover;">
+                    <h3 class="text-2xl font-bold mb-2 text-white">Classique</h3>
+                    <p class="text-gray-200 mb-2">Sobre, efficace, idéal pour les candidatures traditionnelles.</p>
+                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 preview-hover" style="background:rgba(30,30,40,0.93);border-radius:2rem;">
+                        <img src="/static/cv_classic_sample.jpg" alt="Aperçu Modèle Classique" style="max-width:98%;max-height:98%;border-radius:18px;box-shadow:0 0 32px #667eea99;transform:scale(1.25);transition:transform 0.3s;">
+                    </div>
+                </div>
+                <!-- Créatif -->
+                <div class="cv-model-block bg-gradient-to-br from-green-700/80 to-emerald-900/80 group" data-model="etudiant">
+                    <img src="/static/cv_creatif_photodemo.png" alt="Modèle Créatif" loading="lazy"
+                         class="w-full rounded-xl mb-6 shadow-md transition-all duration-300 group-hover:scale-125 group-hover:z-20 group-hover:shadow-2xl"
+                         style="height:220px;object-fit:cover;">
+                    <h3 class="text-2xl font-bold mb-2 text-white">Créatif</h3>
+                    <p class="text-gray-200 mb-2">Visuel, coloré, parfait pour les profils artistiques ou étudiants.</p>
+                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 preview-hover" style="background:rgba(30,30,40,0.93);border-radius:2rem;">
+                        <img src="/static/cv_creatif_photodemo.png" alt="Aperçu Modèle Créatif"
+                             style="max-width:98%;max-height:98%;border-radius:18px;box-shadow:0 0 32px #34d39999;transform:scale(1.25);transition:transform 0.3s;">
+                    </div>
+                </div>
+            </div>
+            <div class="mt-6 text-center">
+                <span class="inline-block bg-gradient-to-r from-[#00ffae] to-[#667eea] text-white px-6 py-2 rounded-full font-semibold shadow-md text-lg tracking-wide">
+                   
+                </span>
+            </div>
+        </div>
+    </main>
     <!-- CV Card Animation -->
     <div class="cv-card-container" style="position:relative; z-index:20; min-height:340px;">
-        <!-- Animation: the card slides up from behind the main block and grows -->
         <div id="cv-card-animated"
             style="
                 position: absolute;
@@ -188,7 +190,6 @@
                 style="box-shadow:0 12px 40px #00ffae33, 0 2px 12px #0008; border-radius:18px;"/>
         </div>
     </div>
-
     <!-- Footer simple -->
     <footer class="w-full mt-20 py-6 text-center text-gray-400 text-sm" style="background:rgba(20,25,35,0.85);border-radius:18px;">
         ©2025 Fayssal EL HOUARI
@@ -201,15 +202,14 @@
             </div>
         </div>
     </footer>
-
     <script>
         // Create background bubbles
         function createBubbles() {
             const container = document.getElementById('bubbles-container');
-            const bubbleCount = 15;
+            const bubbleCount = 12;
             for (let i = 0; i < bubbleCount; i++) {
                 const bubble = document.createElement('div');
-                const size = Math.random() * 100 + 50;
+                const size = Math.random() * 80 + 40;
                 const posX = Math.random() * 100;
                 const posY = Math.random() * 100;
                 const delay = Math.random() * 5;
@@ -219,7 +219,7 @@
                 bubble.style.left = `${posX}%`;
                 bubble.style.top = `${posY}%`;
                 bubble.style.animationDelay = `${delay}s`;
-                bubble.style.opacity = Math.random() * 0.2 + 0.05;
+                bubble.style.opacity = Math.random() * 0.18 + 0.07;
                 container.appendChild(bubble);
             }
         }
@@ -242,11 +242,6 @@
             });
         });
 
-        // Le bouton "Créer un CV" ne fait plus rien ici
-        document.getElementById('cv-create-btn').addEventListener('click', function() {
-            // Optionnel : vous pouvez laisser vide ou afficher un message
-        });
-
         // Animation du "cart de jeu" (carte CV) qui sort de derrière le bloc principal
         window.addEventListener('DOMContentLoaded', function() {
             setTimeout(function() {
@@ -255,11 +250,33 @@
                     card.style.opacity = '1';
                     card.style.transform = 'translateX(-50%) translateY(-60px) scale(1) rotateY(0deg)';
                 }
-            }, 900); // Délai pour laisser le bloc principal s'afficher d'abord
+            }, 900);
         });
+
+        // Doc Pro contact panel hover effect (conserve la logique)
+        (function() {
+            const btn = document.getElementById('docpro-btn');
+            const panel = document.getElementById('docpro-contact-panel');
+            if (!btn || !panel) return;
+            let hoverTimeout;
+            function showPanel() {
+                clearTimeout(hoverTimeout);
+                panel.style.opacity = '1';
+                panel.style.pointerEvents = 'auto';
+                panel.style.transform = 'translate(-50%,10px) scale(1.04)';
+            }
+            function hidePanel() {
+                hoverTimeout = setTimeout(() => {
+                    panel.style.opacity = '0';
+                    panel.style.pointerEvents = 'none';
+                    panel.style.transform = 'translate(-50%,0) scale(1)';
+                }, 180);
+            }
+            btn.addEventListener('mouseenter', showPanel);
+            btn.addEventListener('mouseleave', hidePanel);
+            panel.addEventListener('mouseenter', showPanel);
+            panel.addEventListener('mouseleave', hidePanel);
+        })();
     </script>
 </body>
-<div style="width:100vw;position:fixed;left:0;bottom:0;text-align:center;color:#888;font-size:0.98rem;opacity:0.7;letter-spacing:0.03em;z-index:999;">
-    ©2025 Fayssal EL HOUARI
-</div>
 </html>
