@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, send_file, jsonify, redirect, url_for, make_response, abort
+from flask import Flask, render_template, request, send_file, jsonify, redirect, url_for, make_response, abort, session
 from docx import Document
 from io import BytesIO
 import docx.shared
@@ -12,8 +12,57 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from weasyprint import HTML
 from markupsafe import escape
+from functools import wraps
+import hashlib
+import hmac
 
 app = Flask(__name__)
+
+# --- Sécurité admin ---
+
+# Hash sécurisé des identifiants (ne pas afficher les identifiants en clair)
+_ADMIN_USER_HASH = "4bb72d934b95b93cf05f55d089c618fd03359dbb33310ae93d5844f4d65ba068"  # <-- Remplacez par le vrai hash
+_ADMIN_PASS_HASH = "f9365b994ecae904a6b8b59158cfb635fed317b3f8d1727a366ea225ef18f8be"  # <-- Remplacez par le vrai hash
+
+# Remplacez les FAUX hash par les vrais hash SHA256 de vos identifiants :
+
+def check_admin_auth(username, password):
+    user_ok = hmac.compare_digest(
+        hashlib.sha256(username.encode()).hexdigest(),
+        _ADMIN_USER_HASH
+    )
+    pass_ok = hmac.compare_digest(
+        hashlib.sha256(password.encode()).hexdigest(),
+        _ADMIN_PASS_HASH
+    )
+    return user_ok and pass_ok
+
+def admin_login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('admin_logged_in'):
+            return redirect(url_for('admin_login', next=request.url))
+        return f(*args, **kwargs)
+    return decorated_function
+
+@app.route('/admin_login', methods=['GET', 'POST'])
+def admin_login():
+    error = None
+    if request.method == 'POST':
+        username = request.form.get('username', '')
+        password = request.form.get('password', '')
+        if check_admin_auth(username, password):
+            session['admin_logged_in'] = True
+            next_url = request.args.get('next') or url_for('admin')
+            return redirect(next_url)
+        else:
+            error = "Identifiants invalides."
+    return render_template('admin_login.html', error=error)
+
+@app.route('/admin_logout')
+def admin_logout():
+    session.pop('admin_logged_in', None)
+    return redirect(url_for('admin_login'))
 
 def appliquer_style(doc, theme):
     """Applique un style au document en fonction du thème choisi"""
@@ -365,6 +414,7 @@ def save_motivation():
     return jsonify({"status": "ok"})
 
 @app.route('/admin')
+@admin_login_required
 def admin():
     conn = sqlite3.connect("cv_data.db")
     conn.row_factory = sqlite3.Row

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Connexion Admin</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <style>
+        body { background: #181818; color: #eee; font-family: sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+        .login-box {
+            background: #232946;
+            border-radius: 14px;
+            box-shadow: 0 0 24px #00ffae33;
+            padding: 36px 32px 28px 32px;
+            min-width: 320px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .login-box h2 { color: #00ffae; margin-bottom: 18px; }
+        .login-box input[type="text"], .login-box input[type="password"] {
+            width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #bbb; margin-bottom: 18px; font-size: 1.1em;
+        }
+        .login-box button {
+            background: linear-gradient(90deg, #00ffae 60%, #667eea 100%);
+            color: #232946; font-weight: bold; border: none; border-radius: 8px; padding: 10px 24px; font-size: 1.1em; cursor: pointer;
+            transition: background 0.2s;
+        }
+        .login-box button:hover { background: linear-gradient(90deg, #667eea 60%, #00ffae 100%); }
+        .error-msg { color: #ff4d4d; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <form class="login-box" method="post" autocomplete="off">
+        <h2>Connexion Admin</h2>
+        {% if error %}
+            <div class="error-msg">{{ error }}</div>
+        {% endif %}
+        <input type="text" name="username" placeholder="Nom d'utilisateur" required autocomplete="username">
+        <input type="password" name="password" placeholder="Mot de passe" required autocomplete="current-password">
+        <button type="submit">Se connecter</button>
+    </form>
+</body>
+</html>
